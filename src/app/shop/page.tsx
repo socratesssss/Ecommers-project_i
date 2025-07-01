@@ -1,0 +1,46 @@
+// import { Banner } from '@/components/Banner'
+import ProductCard from '@/components/Card'
+import React from 'react'
+
+const ShopPage = () => {
+  return (
+  <div>
+  
+      <div className='grid grid-cols-2 md:grid-cols-5 mx-auto px-4 md:px-6 py-10 container gap-3'>
+       
+     <ProductCard 
+       image="https://www.vaporzonebd.com/admin_assats/product/d103f16a8bc88e82bfee1e3819e47b8a.vaporesso-xros-5-mini-pod-system.webp"
+        name="Vape Pro 3000"
+        price="39.99"
+        />
+     <ProductCard 
+       image="https://www.vaporzonebd.com/admin_assats/product/d103f16a8bc88e82bfee1e3819e47b8a.vaporesso-xros-5-mini-pod-system.webp"
+        name="Vape Pro 3000"
+        price="39.99"
+        />
+     <ProductCard 
+       image="https://www.vaporzonebd.com/admin_assats/product/d103f16a8bc88e82bfee1e3819e47b8a.vaporesso-xros-5-mini-pod-system.webp"
+        name="Vape Pro 3000"
+        price="39.99"
+        />
+     <ProductCard 
+       image="https://www.vaporzonebd.com/admin_assats/product/d103f16a8bc88e82bfee1e3819e47b8a.vaporesso-xros-5-mini-pod-system.webp"
+        name="Vape Pro 3000"
+        price="39.99"
+        />
+     <ProductCard 
+       image="https://www.vaporzonebd.com/admin_assats/product/d103f16a8bc88e82bfee1e3819e47b8a.vaporesso-xros-5-mini-pod-system.webp"
+        name="Vape Pro 3000"
+        price="39.99"
+        />
+     <ProductCard 
+       image="https://www.vaporzonebd.com/admin_assats/product/d103f16a8bc88e82bfee1e3819e47b8a.vaporesso-xros-5-mini-pod-system.webp"
+        name="Vape Pro 3000"
+        price="39.99"
+        />
+    </div>
+  </div>
+  )
+}
+
+export default ShopPage
