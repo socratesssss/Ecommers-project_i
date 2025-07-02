@@ -13,7 +13,8 @@ const ShopPage = () => {
             images={item.images} // ✅ correct prop name and type
             name={item.name}
             inStock={item.inStock}
-            price={`$${item.price.toFixed(2)}`}
+           discountPrice={item.discountPrice}
+            price={item.price}
           />
         ))}
       </div>
