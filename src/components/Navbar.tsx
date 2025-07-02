@@ -4,12 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X, Search, ShoppingCart } from 'lucide-react';
 import SearchBox from './SearchBox';
+import CartModel from './CartModel';
+import { section } from 'framer-motion/client';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-
+const [isCartOpen,setIsCartOpen] = useState(false);
   return (
-    <nav className="w-full px-4 md:px-6 py-2 bg-gray-200 shadow-md flex justify-between items-center relative">
+   <section className='w-full bg-gray-200'>
+     <nav className="container mx-auto  px-4 md:px-6 py-2  shadow-md flex justify-between items-center relative ">
       {/* Left side: Logo + Search (mobile) + Hamburger */}
       <div className="flex items-center justify-between w-full md:w-auto">
         <div className="flex items-center justify-center gap-7">
@@ -43,12 +46,21 @@ export default function Navbar() {
       </ul>
 
       {/* Right icons (desktop only) */}
-      <div className="hidden md:flex items-center space-x-6">
+      <div className="hidden md:flex  items-center space-x-6">
        <SearchBox/>
-        <button aria-label="Cart">
+       <div className='relative'>
+         <button aria-label="Cart" onClick={()=>setIsCartOpen((prev)=>!prev)}>
           <ShoppingCart className="w-5 h-5 text-gray-700 hover:text-black" />
         </button>
+        <div className='absolute -top-3 -right-3 w-5 h-5 bg-[#F35C7A] rounded-full text-white text-sm flex items-center  justify-center '>2</div>
+       </div>
+
+       
       </div>
+       {
+          isCartOpen && <CartModel/> 
+          
+        }
 
       {/* Mobile Dropdown Menu */}
       {isOpen && (
@@ -69,5 +81,6 @@ export default function Navbar() {
         </div>
       )}
     </nav>
+   </section>
   );
 }
