@@ -1,9 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
 const CartModel = () => {
+  const [isOpen, setIsOpen] = useState(true);
+  const cartRef = useRef<HTMLDivElement>(null);
+
   const cartItems = [
     {
       _id: '1',
@@ -28,8 +31,25 @@ const CartModel = () => {
     0
   );
 
+  // Close on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  if (!isOpen) return null;
+
   return (
-    <div className="absolute p-4 w-96 rounded-md shadow-[0_3px_10px_rgb(0,0,0,0.2)] bg-white top-12 right-0 flex flex-col gap-6 z-20">
+    <div
+      ref={cartRef}
+      className="absolute p-4 w-96 rounded-md shadow-[0_3px_10px_rgb(0,0,0,0.2)] bg-white top-12 right-0 flex flex-col gap-6 z-20"
+    >
       {cartItems.length === 0 ? (
         <div className="text-center text-gray-500">Cart is Empty</div>
       ) : (
@@ -49,7 +69,6 @@ const CartModel = () => {
                 />
 
                 <div className="flex flex-col justify-between w-full">
-                  {/* Top */}
                   <div>
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold">{item.productName.original}</h3>
@@ -67,7 +86,6 @@ const CartModel = () => {
                     </p>
                   </div>
 
-                  {/* Bottom */}
                   <div className="flex justify-between items-center text-sm mt-2">
                     <span className="text-gray-500">Qty: {item.quantity}</span>
                     <span className="text-blue-500 cursor-pointer">Remove</span>

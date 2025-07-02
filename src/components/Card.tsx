@@ -50,7 +50,7 @@ export default function ProductCard({
       </Link>
 
       <div className="p-1 sm:p-2 flex flex-col">
-        <h3 className="text-[14px] sm:text-base leading-6 font-semibold text-gray-800 line-clamp-1">{name}</h3>
+        <h3 className="text-[14px] sm:text-base leading-4 font-semibold text-gray-800 line-clamp-2">{name}</h3>
 
         {/* Price display */}
         <div className="flex items-center justify-between">
@@ -70,7 +70,7 @@ export default function ProductCard({
    
         {
           discountPrice && <div className="flex gap-4 items-center ">
-            <p className="text-gray-400 text-[10px] sm:text-xs line-through">${price.toFixed(2)}</p>
+            <p className="text-gray-400 text-[12px] line-through">${price.toFixed(2)}</p>
              <span className="text-green-600 text-[10px] sm:text-xs font-medium">
             {discountPercent}% OFF
           </span>

@@ -5,20 +5,21 @@ import Link from 'next/link';
 import { Menu, X, Search, ShoppingCart } from 'lucide-react';
 import SearchBox from './SearchBox';
 import CartModel from './CartModel';
-import { section } from 'framer-motion/client';
+import Image from 'next/image';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 const [isCartOpen,setIsCartOpen] = useState(false);
   return (
-   <section className='w-full bg-gray-200'>
+   <div className='w-full bg-gray-200'>
      <nav className="container mx-auto  px-4 md:px-6 py-2  shadow-md flex justify-between items-center relative ">
       {/* Left side: Logo + Search (mobile) + Hamburger */}
       <div className="flex items-center justify-between w-full md:w-auto">
         <div className="flex items-center justify-center gap-7">
           {/* Logo */}
           <Link href="/" className="text-2xl font-bold text-black whitespace-nowrap">
-            <img src="logoo.png" className='w-auto h-12' alt="" />
+            <Image src="/logoo.png"   width={18}
+      height={0}  alt="" />
           </Link>
 
            {/* Mobile Search Box */}
@@ -81,6 +82,6 @@ const [isCartOpen,setIsCartOpen] = useState(false);
         </div>
       )}
     </nav>
-   </section>
+   </div>
   );
 }
