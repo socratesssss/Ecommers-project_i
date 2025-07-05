@@ -1,7 +1,11 @@
-import React from "react";
+'use client';
+
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, CheckCircle } from "lucide-react";
+import { useDispatch } from 'react-redux';
+import { addToCart } from '@/redux/cartSlice';
 
 type ProductCardProps = {
   id: number;
@@ -20,14 +24,37 @@ export default function ProductCard({
   discountPrice,
   inStock,
 }: ProductCardProps) {
-  // Calculate discount percentage rounded to integer
+  const dispatch = useDispatch();
+  const [animate, setAnimate] = useState(false);
+
+  const handleAdd = () => {
+    dispatch(addToCart({
+      _id: id.toString(),
+      productName: { original: name },
+      price: { amount: discountPrice || price },
+      quantity: 1,
+      imageUrl: images[0],
+      availability: { status: inStock ? 'In Stock' : 'Out of Stock' },
+    }));
+
+    setAnimate(true);
+    setTimeout(() => setAnimate(false), 1000);
+  };
+
   const discountPercent =
     discountPrice && discountPrice < price
       ? Math.round(((price - discountPrice) / price) * 100)
       : 0;
 
   return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300">
+    <div className="relative bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 p-2">
+      {animate && (
+        <div className="absolute top-3 right-3 text-green-500 animate-bounce flex items-center gap-1">
+          <CheckCircle className="w-5 h-5" />
+          <span className="text-sm font-medium">Added!</span>
+        </div>
+      )}
+
       <Link href={`/products/${id}`}>
         <div className="relative w-full aspect-[4/3] group">
           {images[0] && (
@@ -49,52 +76,38 @@ export default function ProductCard({
         </div>
       </Link>
 
-      <div className="p-1 sm:p-2 flex flex-col">
-        <h3 className="text-[14px] sm:text-base leading-4 font-semibold text-gray-800 line-clamp-2">{name}</h3>
+      <div className="p-2 flex flex-col">
+        <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">{name}</h3>
 
-        {/* Price display */}
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <p className="text-[#FB7009] text-[14px] sm:text-base font-semibold">
-              {discountPrice !== undefined ? `$${discountPrice.toFixed(2)}` : `$${price.toFixed(2)}`}
-            </p>
-          
-          </div>
+        <div className="flex justify-between items-center mt-1">
+          <p className="text-[#FB7009] font-semibold">
+            {discountPrice ? `$${discountPrice.toFixed(2)}` : `$${price.toFixed(2)}`}
+          </p>
           {!inStock && (
-            <span className="text-red-500 text-[10px] sm:text-xs font-semibold">
-              Out of stock
-            </span>
+            <span className="text-red-500 text-xs font-semibold">Out of stock</span>
           )}
         </div>
 
-   
-        {
-          discountPrice && <div className="flex gap-4 items-center ">
-            <p className="text-gray-400 text-[12px] line-through">${price.toFixed(2)}</p>
-             <span className="text-green-600 text-[10px] sm:text-xs font-medium">
-            {discountPercent}% OFF
-          </span>
-
+        {discountPrice && (
+          <div className="flex gap-3 items-center mt-1">
+            <p className="text-gray-400 text-xs line-through">${price.toFixed(2)}</p>
+            <span className="text-green-600 text-xs">{discountPercent}% OFF</span>
           </div>
-        }
-       
+        )}
 
-       
-          <Link href={inStock ? "/cart" : "#"}>
-            <div
-              className={`cursor-pointer mt-2 text-xs mb-1 sm:mb-0 font-semibold py-1 px-3 rounded-full flex justify-center items-center gap-2 transition-all duration-200 ease-in
-              ${
-                inStock
-                  ? "border border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
-                  : "bg-gray-200 text-gray-500 pointer-events-none"
-              }`}
-            >
-              <ShoppingCart className="size-3 sm:size-5" />
-              Add to cart
-            </div>
-          </Link>
-       
+        <button
+          onClick={handleAdd}
+          disabled={!inStock}
+          className={`mt-3 text-xs font-semibold py-1 px-3 rounded-full flex justify-center items-center gap-2 transition-all duration-200 ease-in
+            ${inStock
+              ? "border border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
+              : "bg-gray-200 text-gray-500 pointer-events-none"
+            }`}
+        >
+          <ShoppingCart className="size-3 sm:size-5" />
+          Add to cart
+        </button>
       </div>
     </div>
   );
-}
+};

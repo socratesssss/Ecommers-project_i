@@ -8,7 +8,7 @@ export type Product = {
   name: string;
   price: number;
   discountPrice?: number;
-  category: "vape" | "liquid" | "flavor";
+  category: "Vape" | "Juice" | "Pods";
   images: string[];
   inStock: boolean;
   miniDescription: string;
@@ -22,11 +22,11 @@ export const products: Product[] = [
     name: "Vape Storm X200",
     price: 20,
     discountPrice: 18,
-    category: "vape",
+    category: "Vape",
     images: ["/vape1.jpg", "/vape2.webp", "/vape10.jpg"],
     inStock: true,
     miniDescription: "Compact, powerful vape with adjustable wattage, long battery life, and leak‑proof design.",
-    description: "The Storm X200 delivers smooth, customizable hits...",
+    description: "The Storm X200 delivers smooth, customizable hits         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi voluptatibus accusantium sed sapiente aliquam ab eos dolore est impedit. Optio praesentium deserunt aspernatur voluptatum nam, sint atque asperiores? Impedit ipsa ipsam, unde officia tempore soluta. Error, totam illo dolore asperiores officiis quas incidunt magnam nulla voluptatibus, commodi magni velit quam expedita saepe. Sequi commodi tempore odit ipsa eos. Maiores dolore qui consequuntur. Similique, beatae. Nisi consequatur magni rerum dolorem aperiam totam perferendis pariatur, ullam unde inventore magnam ab doloribus animi at non atque ad soluta quos illo ea distinctio culpa voluptate? Corporis aut illum eaque aspernatur quasi perspiciatis. Ipsum accusamus numquam veniam fugit corporis laboriosam voluptatem! Cupiditate quod porro voluptates obcaecati aliquid facilis ex blanditiis cumque, molestias reiciendis consequuntur modi culpa eligendi doloribus aliquam eum dolorum adipisci velit laudantium amet provident, enim at! Repudiandae, corporis et, natus dolore esse consequuntur saepe atque accusantium possimus sequi explicabo impedit inventore nisi vel? Temporibus enim sint labore odit dolore quis consequuntur distinctio. Placeat distinctio sunt vitae itaque ipsam soluta sit eius voluptate, ea, architecto fuga obcaecati. Natus fugiat inventore labore excepturi quod laboriosam. Fuga quo repudiandae praesentium atque autem odit voluptate nisi commodi tenetur ipsa enim consequatur, rem sed numquam eius dolor. Corporis!</p> ",
     productColors: [
       {
         color: "#f34534",
@@ -43,17 +43,17 @@ export const products: Product[] = [
     name: "Menthol Chill Liquid",
     price: 40,
     discountPrice: 38,
-    category: "liquid",
+    category: "Vape",
     images: ["/vape3.jpg", "/vape1.jpg", "/vape4.webp"],
     inStock: true,
     miniDescription: "Crisp, cooling menthol e‑liquid made with premium nicotine salts...",
-    description: "Experience the ultimate chill with Menthol Chill Liquid..."
+    description: "Experience the ultimate chill with Menthol Chill Liquid          <>Lorem ipsum dolor sit amet consectetur adipisicing elit. Excepturi voluptatibus accusantium sed sapiente aliquam ab eos dolore est impedit. Optio praesentium deserunt aspernatur voluptatum nam, sint atque asperiores? Impedit ipsa ipsam, unde officia tempore soluta. Error, totam illo dolore asperiores officiis quas incidunt magnam nulla voluptatibus, commodi magni velit quam expedita saepe. Sequi commodi tempore odit ipsa eos. Maiores dolore qui consequuntur. Similique, beatae. Nisi consequatur magni rerum dolorem aperiam totam perferendis pariatur, ullam unde inventore magnam ab doloribus animi at non atque ad soluta quos illo ea distinctio culpa voluptate? Corporis aut illum eaque aspernatur quasi perspiciatis. Ipsum accusamus numquam veniam fugit corporis laboriosam voluptatem! Cupiditate quod porro voluptates obcaecati aliquid facilis ex blanditiis cumque, molestias reiciendis consequuntur modi culpa eligendi doloribus aliquam eum dolorum adipisci velit laudantium amet provident, enim at! Repudiandae, corporis et, natus dolore esse consequuntur saepe atque accusantium possimus sequi explicabo impedit inventore nisi vel? Temporibus enim sint labore odit dolore quis consequuntur distinctio. Placeat distinctio sunt vitae itaque ipsam soluta sit eius voluptate, ea, architecto fuga obcaecati. Natus fugiat inventore labore excepturi quod laboriosam. Fuga quo repudiandae praesentium atque autem odit voluptate nisi commodi tenetur ipsa enim consequatur, rem sed numquam eius dolor. Corporis!"
   },
   {
     id: 3,
     name: "Berry Mix Flavor Pods",
     price: 30,
-    category: "flavor",
+    category: "Pods",
     images: ["/vape4.webp", "/vape9.jpg", "/vape7.avif"],
     inStock: false,
     miniDescription: "Sweet and tangy wild berries blend in a convenient, ready‑to‑use pod.",
@@ -73,7 +73,7 @@ export const products: Product[] = [
     id: 4,
     name: "Liquid Gold Tobacco",
     price: 50,
-    category: "liquid",
+    category: "Vape",
     images: ["/vape5.webp", "/vap6.jpg", "/vape8.jpg"],
     inStock: true,
     miniDescription: "Rich, smooth tobacco e‑liquid offering a classic, full‑bodied vaping experience.",
@@ -84,7 +84,7 @@ export const products: Product[] = [
     name: "Vape Cloud King",
     price: 30,
     discountPrice: 27,
-    category: "vape",
+    category: "Pods",
     images: ["/vap6.jpg", "/vape1.jpg", "/vape3.jpg"],
     inStock: false,
     miniDescription: "High‑wattage device with dual batteries, 200W max output, and adjustable airflow.",
@@ -94,7 +94,7 @@ export const products: Product[] = [
     id: 6,
     name: "Watermelon Ice Pods",
     price: 20,
-    category: "flavor",
+    category: "Vape",
     images: ["/vape7.avif", "/vape5.webp", "/vape4.webp"],
     inStock: true,
     miniDescription: "Juicy watermelon meets icy menthol in these convenient, refillable flavor pods.",
@@ -115,7 +115,7 @@ export const products: Product[] = [
     name: "Citrus Splash Liquid",
     price: 20,
     discountPrice: 15,
-    category: "liquid",
+    category: "Juice",
     images: ["/vape8.jpg", "/vape1.jpg", "/vape2.webp"],
     inStock: false,
     miniDescription: "Zesty lemon and lime blend with a hint of soda‑like sparkle.",
@@ -125,7 +125,7 @@ export const products: Product[] = [
     id: 8,
     name: "Flavor Pack: Tropic Thunder",
     price: 20,
-    category: "flavor",
+    category: "Pods",
     images: ["/vape9.jpg", "/vape3.jpg", "/vape8.jpg"],
     inStock: true,
     miniDescription: "Exotic pineapple, mango, and coconut blend for an island getaway in every puff.",
@@ -146,7 +146,7 @@ export const products: Product[] = [
     name: "Stealth Vape Mini",
     price: 20,
     discountPrice: 19,
-    category: "vape",
+    category: "Vape",
     images: ["/vape10.jpg", "/vape1.jpg", "/vap6.jpg"],
     inStock: true,
     miniDescription: "Ultra‑portable vape with fast USB‑C charging and discreet design.",
@@ -156,7 +156,7 @@ export const products: Product[] = [
     id: 10,
     name: "Cool Mint Liquid",
     price: 20,
-    category: "liquid",
+    category: "Juice",
     images: ["/vape8.jpg", "/vape5.webp", "/vape10.jpg"],
     inStock: true,
     miniDescription: "Classic cool mint e‑liquid for a crisp, refreshing vape experience.",
