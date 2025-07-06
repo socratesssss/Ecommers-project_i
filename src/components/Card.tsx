@@ -47,7 +47,7 @@ export default function ProductCard({
       : 0;
 
   return (
-    <div className="relative bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 p-2">
+    <div className="relative bg-white     rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 p-2">
       {animate && (
         <div className="absolute top-3 right-3 text-green-500 animate-bounce flex items-center gap-1">
           <CheckCircle className="w-5 h-5" />

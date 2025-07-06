@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import StoreProbider from "./StoreProbider";
+import BotNavMob from "@/components/BotNavMob";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <StoreProbider>
             <Navbar />
   {children}
+  <BotNavMob/>
         </StoreProbider>
      
        

@@ -22,7 +22,7 @@ const SearchPage = () => {
         <span className="text-blue-500 border-blue-400 border-b-1">{searchTerm || '...'}</span>
       </h1>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 z-0 lg:grid-cols-5 gap-4">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
             <ProductCard

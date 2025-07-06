@@ -31,7 +31,7 @@ const ShopPage = () => {
   });
 
   return (
-    <div className="md:px-6 md:py-10 container mx-auto">
+    <div className="md:px-6 md:py-10 z-50 container mx-auto">
       {/* Filter Component */}
       <ProductFilter onFilterChange={setFilters} />
 

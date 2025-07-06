@@ -41,7 +41,7 @@ const CartModel = () => {
       ref={cartRef}
       className="
         fixed top-0 left-0 z-50
-        w-full h-full p-4 bg-white overflow-auto
+        w-full h-[100lvh] p-4 bg-white overflow-auto
         md:absolute md:top-18 md:right-0 md:w-full md:max-w-md md:h-auto md:p-4 md:rounded-md md:shadow-lg
         lg:right-4 lg:left-auto
         flex flex-col gap-6
@@ -167,7 +167,7 @@ const CartModel = () => {
               <button className="flex-1  hidden rounded-md py-3 px-4 ring-1 ring-gray-300 hover:bg-gray-50">
                 View Cart
               </button>
-              <Link href="/checkout" onClick={() =>{ setIsOpen((prev) => !prev)}}
+              <Link href="/checkout" onClick={() =>{ setIsOpen(() => false)}}
  className=" flex-1 rounded-md py-3 px-4 text-center bg-black text-white hover:bg-gray-800">
                 Checkout
               </Link>

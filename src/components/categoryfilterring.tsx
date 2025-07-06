@@ -43,7 +43,7 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
   };
 
   return (
-    <div className="border-b p-4 bg-white mb-6">
+    <div className="border-b p-4 bg-white mb-6 md:pt-16">
       <div className="flex  flex-wrap  lg:items-center justify-between gap-4">
         {/* Categories */}
         <div className="flex flex-wrap gap-2">
