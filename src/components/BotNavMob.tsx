@@ -16,7 +16,7 @@ const BotNavMob = () => {
   return (
     <>
       <div className="md:hidden pt-20">
-        <div className="fixed bottom-0 z-10 w-full bg-gray-100 border-t">
+        <div className="fixed bottom-0 z-50 w-full bg-gray-100 border-t">
           <ul className="grid grid-cols-4 py-2 justify-center text-gray-800 font-medium">
             <li className="flex justify-center items-center">
               <Link href="/orders" className="flex justify-center items-center flex-col">
@@ -78,7 +78,7 @@ const BotNavMob = () => {
 
       {/* Search Overlay */}
       {showSearch && (
-        <div className="fixed inset-0 flex top-0 justify-center items-start z-10">
+        <div className="fixed inset-0 flex top-0 justify-center items-start z-40">
           <div className="bg-white p-4 rounded-md shadow-lg w-full max-w-md relative">
             <SearchBox />
             <button

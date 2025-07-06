@@ -46,7 +46,7 @@ export default function Navbar() {
 
   return (
     <div
-      className={`w-full bg-gray-200 relative md:fixed top-0 left-0 z-50 shadow transition-transform duration-300 ${
+      className={`w-full bg-gray-200 relative md:fixed top-0 left-0 z-30 shadow transition-transform duration-300 ${
         show ? "translate-y-0" : "-translate-y-full"
       }`}
     >
