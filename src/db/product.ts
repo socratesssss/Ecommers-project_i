@@ -61,11 +61,11 @@ export const products: Product[] = [
     productColors: [
       {
         color: "#D61C4E",
-        images: ["/berry-red.jpg"]
+        images: ["/vape2.web"]
       },
       {
         color: "#FFB200",
-        images: ["/berry-yellow.jpg"]
+        images: ["/vape9.jpg"]
       }
     ]
   },
@@ -102,11 +102,11 @@ export const products: Product[] = [
     productColors: [
       {
         color: "#CB1C8D",
-        images: ["/watermelon-pink.jpg"]
+        images: ["/vape5.webp"]
       },
       {
         color: "#FFE5B4",
-        images: ["/watermelon-cream.jpg"]
+        images: ["/vape5.webp"]
       }
     ]
   },
@@ -133,11 +133,11 @@ export const products: Product[] = [
     productColors: [
       {
         color: "#FF914D",
-        images: ["/tropic-orange.jpg"]
+        images: ["/vape3.jpg"]
       },
       {
         color: "#A0E7E5",
-        images: ["/tropic-blue.jpg"]
+        images: ["/vape3.jpg"]
       }
     ]
   },
@@ -164,11 +164,11 @@ export const products: Product[] = [
     productColors: [
       {
         color: "#00C897",
-        images: ["/mint-green.jpg"]
+        images: ["/vape3.jpg"]
       },
       {
         color: "#9ADCFF",
-        images: ["/mint-blue.jpg"]
+        images: ["/vape3.jpg"]
       }
     ]
   }

@@ -14,7 +14,7 @@ const HomePage = () => {
                   <ProductCard
                     key={item.id}
                     id={item.id}
-                    images={item.images} // ✅ correct prop name and type
+                    images={item.images} 
                     name={item.name}
                     inStock={item.inStock}
                       discountPrice={item.discountPrice}
