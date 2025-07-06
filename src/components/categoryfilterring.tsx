@@ -19,7 +19,7 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
   const [maxPrice, setMaxPrice] = useState('');
   const [showPriceFilters, setShowPriceFilters] = useState(false);
 
-  // Apply filter changes
+  // Include onFilterChange in dependency array
   useEffect(() => {
     onFilterChange({
       categories:
@@ -29,7 +29,7 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
       minPrice: minPrice === '' ? 0 : +minPrice,
       maxPrice: maxPrice === '' ? Infinity : +maxPrice,
     });
-  }, [selectedCategories, minPrice, maxPrice]);
+  }, [selectedCategories, minPrice, maxPrice, onFilterChange]);
 
   const handleCategoryChange = (category: string) => {
     if (category === 'All') {

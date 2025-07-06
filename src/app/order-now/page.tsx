@@ -7,14 +7,34 @@ import AddressForm from '@/components/Delibary';
 import { saveAs } from 'file-saver';
 import Link from 'next/link';
 
-const OrderNowPage = () => {
-  const [product, setProduct] = useState<any>(null);
-  const [quantity, setQuantity] = useState(1);
-  const [deliveryCost, setDeliveryCost] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState('cod');
-  const [showSuccess, setShowSuccess] = useState(false);
+type OrderProduct = {
+  _id: string;
+  productName: { original: string };
+  price: { amount: number };
+  quantity: number;
+  imageUrl: string;
+  availability: { status: string };
+};
 
-  const [deliveryDetails, setDeliveryDetails] = useState({
+type DeliveryDetails = {
+  name: string;
+  phone: string;
+  email: string;
+  country: string;
+  emirate: string;
+  city: string;
+  district: string;
+  road: string;
+};
+
+const OrderNowPage = () => {
+  const [product, setProduct] = useState<OrderProduct | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [deliveryCost, setDeliveryCost] = useState<number>(0);
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'bkash'>('cod');
+  const [showSuccess, setShowSuccess] = useState<boolean>(false);
+
+  const [deliveryDetails, setDeliveryDetails] = useState<DeliveryDetails>({
     name: '',
     phone: '',
     email: '',
@@ -28,12 +48,11 @@ const OrderNowPage = () => {
   useEffect(() => {
     const stored = localStorage.getItem('orderNowProduct');
     if (stored) {
-      const parsed = JSON.parse(stored);
+      const parsed: OrderProduct = JSON.parse(stored);
       setProduct(parsed);
       setQuantity(parsed.quantity || 1);
     }
 
-    // Simulate fetching delivery cost from DB
     setTimeout(() => {
       setDeliveryCost(15);
     }, 300);
@@ -58,13 +77,11 @@ const OrderNowPage = () => {
       orderDate: new Date().toISOString(),
     };
 
-    // Save as JSON file
     const blob = new Blob([JSON.stringify(fullOrder, null, 2)], {
       type: 'application/json',
     });
     saveAs(blob, `order-now-${Date.now()}.json`);
 
-    // Clear form & show success popup
     setShowSuccess(true);
     setQuantity(1);
     setDeliveryDetails({
@@ -155,7 +172,7 @@ const OrderNowPage = () => {
 
           {/* Payment */}
           <section className="border p-6 rounded-md shadow bg-white">
-            <h2 className="text-2xl font-bold mb-4">💳 Payment Method</h2>
+            <h2 className="text-2xl font-bold mb-4"> Payment Method</h2>
             <div className="flex gap-6">
               <label className="flex items-center gap-2">
                 <input
@@ -194,18 +211,16 @@ const OrderNowPage = () => {
 
       {/* ✅ Success Modal */}
       {showSuccess && (
-        <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-md text-center space-y-4">
             <h2 className="text-2xl font-bold text-green-600">🎉 Order Successful!</h2>
             <p className="text-gray-700">Your order has been placed and saved successfully.</p>
             <Link
-            href='/'
-           
+              href="/"
               className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
             >
               Close
             </Link>
-            
           </div>
         </div>
       )}

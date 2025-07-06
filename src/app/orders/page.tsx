@@ -1,10 +1,25 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
+type OrderItem = {
+  image: string;
+  name: string;
+  quantity: number;
+  total: number;
+};
+
+type Order = {
+  orderDate: string;
+  products: OrderItem[];
+  deliveryCost: number;
+  total: number;
+};
+
 const OrdersPage = () => {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
     const stored = localStorage.getItem('orders');
@@ -28,7 +43,7 @@ const OrdersPage = () => {
             Order #{index + 1} - {new Date(order.orderDate).toLocaleString()}
           </h2>
 
-          {order.products?.map((item: any, idx: number) => (
+          {order.products?.map((item: OrderItem, idx: number) => (
             <div key={idx} className="flex items-center gap-4 border-b pb-2">
               <Image
                 src={item.image}
@@ -42,7 +57,7 @@ const OrdersPage = () => {
                 <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
               </div>
               <p className="font-semibold text-orange-500">
-                ${(item.total).toFixed(2)}
+                ${item.total.toFixed(2)}
               </p>
             </div>
           ))}
@@ -60,3 +75,4 @@ const OrdersPage = () => {
 };
 
 export default OrdersPage;
+

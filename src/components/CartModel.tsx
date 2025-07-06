@@ -1,5 +1,4 @@
 "use client";
-import ProductCard from "@/components/Card";
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";

@@ -21,18 +21,32 @@ const data = {
       },
     },
   },
+} as const;
+
+type UAEKeys = keyof typeof data.UAE;
+type CityKeys<T extends UAEKeys> = keyof (typeof data.UAE)[T];
+type DistrictKeys<T extends UAEKeys, C extends CityKeys<T>> = keyof (typeof data.UAE)[T][C];
+
+type DeliveryForm = {
+  name: string;
+  phone: string;
+  email: string;
+  country: string;
+  emirate: string;
+  city: string;
+  district: string;
+  road: string;
 };
 
 type Props = {
-  form: any;
-  setForm: React.Dispatch<React.SetStateAction<any>>;
+  form: DeliveryForm;
+  setForm: React.Dispatch<React.SetStateAction<DeliveryForm>>;
 };
 
 const AddressForm: React.FC<Props> = ({ form, setForm }) => {
-  const handleChange = (field: string, value: string) => {
-    setForm((prev: any) => {
+  const handleChange = (field: keyof DeliveryForm, value: string) => {
+    setForm((prev) => {
       const updated = { ...prev, [field]: value };
-
       if (field === 'emirate') {
         updated.city = '';
         updated.district = '';
@@ -43,25 +57,34 @@ const AddressForm: React.FC<Props> = ({ form, setForm }) => {
       } else if (field === 'district') {
         updated.road = '';
       }
-
       return updated;
     });
   };
 
-  const emirates = Object.keys(data['UAE']);
-  const cities = form.emirate ? Object.keys(data['UAE'][form.emirate] || {}) : [];
+  const emirates = Object.keys(data.UAE) as UAEKeys[];
+
+  const emirateKey = form.emirate as UAEKeys;
+  const cities = emirates.includes(emirateKey)
+    ? (Object.keys(data.UAE[emirateKey]) as CityKeys<typeof emirateKey>[])
+    : [];
+
+  const cityKey = form.city as CityKeys<typeof emirateKey>;
   const districts =
-    form.emirate && form.city
-      ? Object.keys(data['UAE'][form.emirate]?.[form.city] || {})
+    emirates.includes(emirateKey) && cityKey in data.UAE[emirateKey]
+      ? (Object.keys(data.UAE[emirateKey][cityKey]) as DistrictKeys<typeof emirateKey, typeof cityKey>[])
       : [];
+
+  const districtKey = form.district as DistrictKeys<typeof emirateKey, typeof cityKey>;
   const roads =
-    form.emirate && form.city && form.district
-      ? data['UAE'][form.emirate]?.[form.city]?.[form.district] || []
+    emirates.includes(emirateKey) &&
+    cityKey in data.UAE[emirateKey] &&
+    districtKey in data.UAE[emirateKey][cityKey]
+      ? data.UAE[emirateKey][cityKey][districtKey]
       : [];
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow space-y-6">
-      <h2 className="text-xl font-bold"> Delivery Address</h2>
+      <h2 className="text-xl font-bold">Delivery Address</h2>
 
       <div className="grid grid-cols-2 gap-4">
         <input
@@ -129,12 +152,12 @@ const AddressForm: React.FC<Props> = ({ form, setForm }) => {
           onChange={(e) => handleChange('district', e.target.value)}
           disabled={!form.city}
         >
-          <option value="">Select District</option>
-          {districts.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
+         <option value="">Select District</option>
+{districts.map((d) => (
+  <option key={String(d)} value={String(d)}>
+    {String(d)}
+  </option>
+))}
         </select>
 
         <select
