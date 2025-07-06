@@ -76,35 +76,35 @@ export default function ProductCard({
         </div>
       </Link>
 
-      <div className="p-2 flex flex-col">
-        <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">{name}</h3>
+      <div className=" sm:py-2 mt-2 flex flex-col">
+        <h3 className="sm:text-sm text-xs font-semibold text-gray-800 line-clamp-2">{name}</h3>
 
-        <div className="flex justify-between items-center mt-1">
+        <div className="flex justify-between text-sm sm:text-base items-center sm:mt-1">
           <p className="text-[#FB7009] font-semibold">
             {discountPrice ? `$${discountPrice.toFixed(2)}` : `$${price.toFixed(2)}`}
           </p>
           {!inStock && (
-            <span className="text-red-500 text-xs font-semibold">Out of stock</span>
+            <span className="text-red-500 text-[10px] sm:text-xs font-semibold">Out of stock</span>
           )}
         </div>
 
         {discountPrice && (
-          <div className="flex gap-3 items-center mt-1">
-            <p className="text-gray-400 text-xs line-through">${price.toFixed(2)}</p>
-            <span className="text-green-600 text-xs">{discountPercent}% OFF</span>
+          <div className="flex gap-3 items-center sm:mt-1">
+            <p className="text-gray-400 text-[10px] sm:text-xs line-through">${price.toFixed(2)}</p>
+            <span className="text-green-600 text-[10px] sm:text-xs">{discountPercent}% OFF</span>
           </div>
         )}
 
         <button
           onClick={handleAdd}
           disabled={!inStock}
-          className={`mt-3 text-xs font-semibold py-1 px-3 rounded-full flex justify-center items-center gap-2 transition-all duration-200 ease-in
+          className={`sm:mt-3 mt-2 text-xs font-semibold py-1 px-3 rounded-full flex justify-center items-center gap-2 transition-all duration-200 ease-in
             ${inStock
-              ? "border border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
+              ? "border border-green-500  active:bg-gray-400 text-green-500 hover:bg-green-500 hover:text-white"
               : "bg-gray-200 text-gray-500 pointer-events-none"
             }`}
         >
-          <ShoppingCart className="size-3 sm:size-5" />
+          <ShoppingCart className="size-3 sm:size-5 " />
           Add to cart
         </button>
       </div>

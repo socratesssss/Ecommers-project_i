@@ -8,7 +8,7 @@ import Image from 'next/image';
 import AddressForm from '@/components/Delibary';
 import { saveAs } from 'file-saver';
 import Link from 'next/link';
-
+// db
 const DELIVERY_COST = 60;
 
 const OrderPage = () => {
@@ -113,7 +113,7 @@ const OrderPage = () => {
 
       {/* Payment Method */}
       <section className="mt-10 border p-4 rounded-md shadow-sm bg-white">
-        <h2 className="text-xl font-bold mb-4">💳 Payment Method</h2>
+        <h2 className="text-xl font-bold mb-4"> Payment Method</h2>
         <div className="flex gap-6">
           <label className="flex items-center gap-2">
             <input
@@ -144,7 +144,7 @@ const OrderPage = () => {
           onClick={handleConfirm}
           className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-md transition"
         >
-          ✅ Confirm Order
+           Confirm Order
         </button>
       </div>
 

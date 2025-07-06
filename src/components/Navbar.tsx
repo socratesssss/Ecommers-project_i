@@ -14,6 +14,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+
+
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -91,11 +93,16 @@ export default function Navbar() {
                 {/* cart */}
                 <div className='relative'>
              <AnimatePresence  >
-                  <button aria-label="Cart" onClick={() => setIsCartOpen(prev => !prev)}>
+                  <button aria-label="Cart" onClick={() => {
+  setIsOpen(false);
+  setIsCartOpen(prev => !prev);
+}}
+ >
               <ShoppingCart className="w-5 h-5 text-gray-700 hover:text-black" />
             </button>
               {totalQuantity > 0 && (
                 <motion.div
+
                   key={totalQuantity}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}

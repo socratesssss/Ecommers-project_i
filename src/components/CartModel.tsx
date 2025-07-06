@@ -167,7 +167,8 @@ const CartModel = () => {
               <button className="flex-1  hidden rounded-md py-3 px-4 ring-1 ring-gray-300 hover:bg-gray-50">
                 View Cart
               </button>
-              <Link href="/checkout" className=" flex-1 rounded-md py-3 px-4 text-center bg-black text-white hover:bg-gray-800">
+              <Link href="/checkout" onClick={() =>{ setIsOpen((prev) => !prev)}}
+ className=" flex-1 rounded-md py-3 px-4 text-center bg-black text-white hover:bg-gray-800">
                 Checkout
               </Link>
               
