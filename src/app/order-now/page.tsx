@@ -104,7 +104,7 @@ const OrderNowPage = () => {
   if (!product) return <p className="p-8 text-center">No product selected.</p>;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8  md:pt-22  space-y-10">
+    <div className="max-w-6xl mx-auto px-4 py-8 pb-14  md:pt-22  space-y-10">
       <div className="grid md:grid-cols-2 gap-6">
         {/* Product Summary */}
         <section className="px-6 rounded-md shadow bg-white space-y-4">

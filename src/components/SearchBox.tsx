@@ -3,19 +3,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { products } from '@/db/product'; // Import your products data
+import { products } from '@/db/product';
 
 type SearchBoxProps = {
   className?: string;
+  onSearchComplete?: () => void; // ✅ New prop
 };
 
-const SearchBox: React.FC<SearchBoxProps> = ({ className = '' }) => {
+const SearchBox: React.FC<SearchBoxProps> = ({ className = '', onSearchComplete }) => {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Filter suggestions based on current input query
   useEffect(() => {
     if (query.trim() === '') {
       setSuggestions([]);
@@ -23,16 +23,13 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = '' }) => {
     }
 
     const filtered = products
-      .filter((p) =>
-        p.name.toLowerCase().includes(query.toLowerCase())
-      )
-      .slice(0, 5) // limit to 5 suggestions
+      .filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
+      .slice(0, 5)
       .map((p) => p.name);
 
     setSuggestions(filtered);
   }, [query]);
 
-  // Close suggestions dropdown if clicked outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -51,6 +48,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = '' }) => {
       router.push(`/list?name=${encodeURIComponent(searchTerm.trim())}`);
       setSuggestions([]);
       setQuery('');
+      if (onSearchComplete) onSearchComplete(); // ✅ Close overlay after search
     }
   };
 
@@ -80,7 +78,6 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = '' }) => {
         </button>
       </form>
 
-      {/* Suggestions Dropdown */}
       {suggestions.length > 0 && (
         <ul className="absolute z-10 bg-white border rounded-md mt-1 w-full max-h-48 overflow-y-auto shadow-md text-sm">
           {suggestions.map((suggestion) => (

@@ -105,7 +105,7 @@ const ProductPage = () => {
     return <div className="p-10 text-center  md:pt-20 text-red-500">Product not found.</div>;
 
   return (
-    <div className="px-4 lg:px-16 xl:px-32 2xl:px-64 py-4  md:pt-20 sm:py-10 flex flex-col md:flex-row gap-4 sm:gap-16">
+    <div className="px-4 lg:px-16 xl:px-32 2xl:px-64 py-4   md:pt-20 sm:py-10 flex flex-col md:flex-row gap-4 sm:gap-16">
       {/* Image Section */}
       <div className="lg:sticky sm:w-1/2 h-max">
         {/* Mobile Image Gallery */}
@@ -293,7 +293,7 @@ const ProductPage = () => {
         )}
 
         {/* Buttons */}
-        <div className="fixed sm:static bottom-2 flex gap-4">
+        <div className="fixed sm:static bottom-2 flex pb-14gap-4">
           <button
             onClick={handleAdd}
             disabled={!product.inStock}
