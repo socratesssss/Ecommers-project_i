@@ -31,7 +31,7 @@ const OrdersPage = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4 space-y-8">
+    <div className="max-w-5xl mx-auto p-4 space-y-8  md:pt-16 ">
       <h1 className="text-2xl font-bold mb-4 text-center">My Orders</h1>
 
       {orders.map((order, index) => (

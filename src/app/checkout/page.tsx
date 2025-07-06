@@ -69,11 +69,11 @@ const OrderPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4  md:pt-16  py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Product Summary */}
         <section className="p-4 rounded-md shadow-sm bg-white">
-          <h2 className="text-xl font-bold mb-4">🛒 Product Summary</h2>
+          <h2 className="text-xl font-bold mb-4">Product Summary</h2>
           {cartItems.length === 0 ? (
             <p className="text-gray-500">Your cart is empty.</p>
           ) : (

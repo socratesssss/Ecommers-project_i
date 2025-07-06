@@ -6,28 +6,21 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import CartModel from "./CartModel";
 import SearchBox from "./SearchBox";
 
 const BotNavMob = () => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
 
   return (
     <>
       <div className="md:hidden pt-20">
         <div className="fixed bottom-0 z-10 w-full bg-gray-100 border-t">
-          <ul className="grid grid-cols-4 px-10 py-2 justify-center text-gray-800 font-medium">
+          <ul className="grid grid-cols-4 py-2 justify-center text-gray-800 font-medium">
             <li className="flex justify-center items-center">
-              {/* Replace "SVG" below with your actual SVG or icon */}
-              <Link
-                href="/orders"
-                className="flex justify-center items-center flex-col"
-              >
-                {/* Example SVG icon or you can put your SVG here */}
-               <svg   className="text-blue-500 w-6 h-6"
+              <Link href="/orders" className="flex justify-center items-center flex-col">
+              <svg   className="text-blue-500 w-6 h-6"
   xmlns="http://www.w3.org/2000/svg"
   viewBox="0 0 512 512"
   fill="currentColor">
@@ -47,10 +40,7 @@ const BotNavMob = () => {
 
             <li className="flex justify-center items-center">
               <button
-                onClick={() => {
-                  console.log("Search toggled", !showSearch);
-                  setShowSearch((prev) => !prev);
-                }}
+                onClick={() => setShowSearch((prev) => !prev)}
                 aria-label="Open Search"
               >
                 <Search />
@@ -64,27 +54,23 @@ const BotNavMob = () => {
             </li>
 
             <li className="flex justify-center items-center relative">
-              <button
-                aria-label="Cart"
-                onClick={() => setIsCartOpen((prev) => !prev)}
-              >
+              <Link href="/all-carts" aria-label="Cart">
                 <ShoppingCart className="w-5 h-5 text-gray-800 hover:text-black" />
-              </button>
-
-              <AnimatePresence>
-                {totalQuantity > 0 && (
-                  <motion.div
-                    key={totalQuantity}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="absolute top-1 left-7 w-4 h-4 bg-[#F35C7A] rounded-full text-white text-[8px] flex items-center justify-center font-medium"
-                  >
-                    {totalQuantity}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                <AnimatePresence>
+                  {totalQuantity > 0 && (
+                    <motion.div
+                      key={totalQuantity}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      className="absolute top-1 left-7 w-4 h-4 bg-[#F35C7A] rounded-full text-white text-[8px] flex items-center justify-center font-medium"
+                    >
+                      {totalQuantity}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Link>
             </li>
           </ul>
         </div>
@@ -92,8 +78,8 @@ const BotNavMob = () => {
 
       {/* Search Overlay */}
       {showSearch && (
-        <div className="fixed inset-0   flex top-0 justify-center items-start z-10">
-          <div className="bg-white p-4 rounded-md shadow-lg w-full max-w-md   relative">
+        <div className="fixed inset-0 flex top-0 justify-center items-start z-10">
+          <div className="bg-white p-4 rounded-md shadow-lg w-full max-w-md relative">
             <SearchBox />
             <button
               onClick={() => setShowSearch(false)}
@@ -105,9 +91,6 @@ const BotNavMob = () => {
           </div>
         </div>
       )}
-
-      {/* Show cart modal if open */}
-      {isCartOpen && <CartModel />}
     </>
   );
 };
