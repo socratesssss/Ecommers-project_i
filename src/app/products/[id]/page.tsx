@@ -293,11 +293,11 @@ const ProductPage = () => {
         )}
 
         {/* Buttons */}
-        <div className="fixed sm:static bottom-2 flex pb-14gap-4">
+        <div className="fixed sm:static bottom-16 gap-3 flex pb-14gap-4">
           <button
             onClick={handleAdd}
             disabled={!product.inStock}
-            className={`px-6 py-3 rounded-lg text-white font-semibold flex gap-1 ${
+            className={`md:px-6 px-3 py-1.5 md:py-3 rounded-lg text-white text-sm md:text-base font-semibold items-center flex gap-1 ${
               product.inStock ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-300 cursor-not-allowed'
             } ${animate ? 'animate-pulse' : ''}`}
             aria-disabled={!product.inStock}
@@ -309,7 +309,7 @@ const ProductPage = () => {
           <button
             onClick={handleOrderNow}
             disabled={!product.inStock}
-            className={`px-6 py-3 rounded-lg text-white font-semibold ${
+            className={`md:px-6 px-3 py-1.5 text-sm md:text-base md:py-3 rounded-lg items-center text-white font-semibold ${
               product.inStock ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-300 cursor-not-allowed'
             }`}
             aria-disabled={!product.inStock}

@@ -69,11 +69,11 @@ const OrderPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4  md:pt-16  py-8">
+    <div className="max-w-6xl mx-auto px-4  md:pt-20  py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Product Summary */}
         <section className="p-4 rounded-md shadow-sm bg-white">
-          <h2 className="text-xl font-bold mb-4">Product Summary</h2>
+          <h2 className="text-xl font-bold mb-4 text-center">Product Summary</h2>
           {cartItems.length === 0 ? (
             <p className="text-gray-500">Your cart is empty.</p>
           ) : (
@@ -112,10 +112,10 @@ const OrderPage = () => {
       </div>
 
       {/* Payment Method */}
-      <section className="mt-10 border p-4 rounded-md shadow-sm bg-white">
-        <h2 className="text-xl font-bold mb-4"> Payment Method</h2>
+      <section className="md:mt-10 mt-5  p-4 rounded-md shadow-sm bg-white">
+        <h2 className="text-xl font-bold mb-4 text-center"> Payment Method</h2>
         <div className="flex gap-6">
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-sm md:text-base">
             <input
               type="radio"
               name="payment"
@@ -125,7 +125,7 @@ const OrderPage = () => {
             />
             Cash on Delivery
           </label>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center text-sm md:text-base gap-2">
             <input
               type="radio"
               name="payment"
@@ -142,7 +142,7 @@ const OrderPage = () => {
       <div className="text-center mt-8">
         <button
           onClick={handleConfirm}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-md transition"
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold md:px-6 md:py-3 px-3 py-1.5 items-center rounded-md transition"
         >
            Confirm Order
         </button>

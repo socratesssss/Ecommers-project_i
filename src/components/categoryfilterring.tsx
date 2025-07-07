@@ -14,7 +14,7 @@ type FilterProps = {
 const categories = ['All', 'Juice', 'Vape', 'Pods'];
 
 const ProductFilter = ({ onFilterChange }: FilterProps) => {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['All']);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [showPriceFilters, setShowPriceFilters] = useState(false);
@@ -46,15 +46,15 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
     <div className="border-b p-4 bg-white mb-6 md:pt-16">
       <div className="flex  flex-wrap  lg:items-center justify-between gap-4">
         {/* Categories */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => handleCategoryChange(cat)}
-              className={`px-3 py-1 rounded-md text-sm border ${
+              className={` text-sm  ${
                 selectedCategories.includes(cat)
-                  ? 'bg-gray-800 text-white border-gray-800'
-                  : 'bg-gray-100 text-gray-700 border-gray-300'
+                  ? ' text-gray-900  border-b '
+                  : ' text-gray-700'
               }`}
             >
               {cat}

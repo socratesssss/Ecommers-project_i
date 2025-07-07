@@ -16,10 +16,11 @@ const SearchPage = () => {
   });
 
   return (
-    <div className="container mx-auto px-4 md:px-6  md:pt-16  py-10">
-      <h1 className="text-xl  mb-6 text-center ">
-        Search Results for{' '}
-        <span className="text-blue-500 border-blue-400 border-b-1">{searchTerm || '...'}</span>
+    <div className="container mx-auto px-4 md:px-6  md:pt-18  py-10">
+      <h1 className="md:text-lg text:md mb-6 text-center ">
+        Search Results for{'  '}
+<span className="text-blue-500 text-xs md:text-base text-center border-blue-400 border-b-1">{searchTerm || '...'}</span>
+        
       </h1>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 z-0 lg:grid-cols-5 gap-4">

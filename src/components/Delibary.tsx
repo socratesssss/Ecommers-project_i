@@ -83,8 +83,8 @@ const AddressForm: React.FC<Props> = ({ form, setForm }) => {
       : [];
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow space-y-6">
-      <h2 className="text-xl font-bold">Delivery Address</h2>
+    <div className="max-w-3xl  p-6 bg-white rounded shadow space-y-6">
+      <h2 className="text-xl font-bold  text-center ">Delivery Address</h2>
 
       <div className="grid grid-cols-1 gap-4">
         <input
