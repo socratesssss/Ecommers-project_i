@@ -49,7 +49,7 @@ export default function ProductCard({
   return (
     <div className="relative bg-white     rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 p-2">
       {animate && (
-        <div className="absolute top-3 right-3 text-green-500 animate-bounce flex items-center gap-1">
+        <div className="absolute top-3 right-3 z-50 bg-white rounded-4xl px-2 py-1 text-green-500 animate-bounce flex items-center gap-1">
           <CheckCircle className="w-5 h-5" />
           <span className="text-sm font-medium">Added!</span>
         </div>
