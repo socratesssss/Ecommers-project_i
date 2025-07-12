@@ -49,7 +49,7 @@ export default function Banner() {
   };
 
   return (
-    <div className="relative w-full mx-auto  md:pt-16 overflow-hidden">
+    <div className="relative w-full mx-auto overflow-hidden">
       {/* Slider container */}
       <div
         className="flex transition-transform duration-700 ease-in-out"

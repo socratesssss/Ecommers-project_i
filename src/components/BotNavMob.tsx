@@ -76,8 +76,8 @@ const BotNavMob = () => {
             </li>
 
             {/* Cart */}
-            <li className="flex justify-center items-center relative">
-              <Link href="/all-carts" aria-label="Cart">
+            <li className="flex justify-center items-center ">
+              <Link href="/all-carts" className="relative" aria-label="Cart">
                 <ShoppingCart className="w-5 h-5 text-gray-800 hover:text-black" />
                 <AnimatePresence>
                   {totalQuantity > 0 && (
@@ -87,7 +87,7 @@ const BotNavMob = () => {
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      className="absolute -top-1 left-7 w-4 h-4 bg-[#F35C7A] rounded-full text-white text-[8px] flex items-center justify-center font-medium"
+                      className="absolute -top-2 -left-2 w-4 h-4 bg-[#F35C7A] rounded-full text-white text-[8px] flex items-center justify-center font-medium"
                     >
                       {totalQuantity}
                     </motion.div>

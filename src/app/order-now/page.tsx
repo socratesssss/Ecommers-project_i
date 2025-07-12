@@ -104,7 +104,7 @@ const OrderNowPage = () => {
   if (!product) return <p className="p-8 text-center">No product selected.</p>;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 pb-14  md:pt-22  space-y-10">
+    <div className="max-w-6xl mx-auto px-4 py-8 pb-14    space-y-10">
       <div className="grid md:grid-cols-2 gap-6">
         {/* Product Summary */}
         <section className="px-6 rounded-md shadow bg-white space-y-4">
@@ -170,42 +170,42 @@ const OrderNowPage = () => {
           {/* Delivery Info */}
           <AddressForm form={deliveryDetails} setForm={setDeliveryDetails} />
 
-          {/* Payment */}
-          <section className="border p-6 rounded-md shadow bg-white">
-            <h2 className="text-2xl font-bold mb-4"> Payment Method</h2>
-            <div className="flex gap-6">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="payment"
-                  value="cod"
-                  checked={paymentMethod === 'cod'}
-                  onChange={() => setPaymentMethod('cod')}
-                />
-                Cash on Delivery
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="payment"
-                  value="bkash"
-                  checked={paymentMethod === 'bkash'}
-                  onChange={() => setPaymentMethod('bkash')}
-                />
-                Bkash/Nagad
-              </label>
-            </div>
-          </section>
+        {/* Payment Method */}
+      <section className="md:mt-10 mt-5  p-4 rounded-md shadow-sm bg-white">
+        <h2 className="text-xl font-bold mb-4 text-center"> Payment Method</h2>
+        <div className="flex gap-6">
+          <label className="flex items-center gap-2 text-sm md:text-base">
+            <input
+              type="radio"
+              name="payment"
+              value="cod"
+              checked={paymentMethod === 'cod'}
+              onChange={() => setPaymentMethod('cod')}
+            />
+            Cash on Delivery
+          </label>
+          <label className="flex items-center text-sm md:text-base gap-2">
+            <input
+              type="radio"
+              name="payment"
+              value="bkash"
+              checked={paymentMethod === 'bkash'}
+              onChange={() => setPaymentMethod('bkash')}
+            />
+            Bkash / Nagad
+          </label>
+        </div>
+      </section>
         </div>
       </div>
 
-      {/* Confirm Order Button */}
-      <div className="text-center">
+     {/* Confirm Button */}
+      <div className="text-center mt-8">
         <button
           onClick={handleConfirm}
-          className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-md text-lg font-semibold"
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold md:px-6 md:py-3 px-3 py-1.5 items-center rounded-md transition"
         >
-          ✅ Confirm Order
+           Confirm Order
         </button>
       </div>
 

@@ -69,7 +69,7 @@ const OrderPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4  md:pt-20  py-8">
+    <div className="max-w-6xl mx-auto px-4    py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Product Summary */}
         <section className="p-4 rounded-md shadow-sm bg-white">

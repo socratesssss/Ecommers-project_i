@@ -8,6 +8,7 @@ type FilterProps = {
     categories: string[];
     minPrice: number;
     maxPrice: number;
+    sortOrder: 'lowToHigh' | 'highToLow' | '';
   }) => void;
 };
 
@@ -17,9 +18,9 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['All']);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [sortOrder, setSortOrder] = useState<'lowToHigh' | 'highToLow' | ''>('');
   const [showPriceFilters, setShowPriceFilters] = useState(false);
 
-  // Include onFilterChange in dependency array
   useEffect(() => {
     onFilterChange({
       categories:
@@ -28,8 +29,9 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
           : selectedCategories,
       minPrice: minPrice === '' ? 0 : +minPrice,
       maxPrice: maxPrice === '' ? Infinity : +maxPrice,
+      sortOrder,
     });
-  }, [selectedCategories, minPrice, maxPrice, onFilterChange]);
+  }, [selectedCategories, minPrice, maxPrice, sortOrder, onFilterChange]);
 
   const handleCategoryChange = (category: string) => {
     if (category === 'All') {
@@ -43,18 +45,18 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
   };
 
   return (
-    <div className="border-b p-4 bg-white mb-6 md:pt-16">
-      <div className="flex  flex-wrap  lg:items-center justify-between gap-4">
+    <div className="border-b p-4 bg-white mb-6">
+      <div className="flex flex-wrap lg:items-center justify-between gap-4">
         {/* Categories */}
         <div className="flex flex-wrap gap-3">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => handleCategoryChange(cat)}
-              className={` text-sm  ${
+              className={`text-sm ${
                 selectedCategories.includes(cat)
-                  ? ' text-gray-900  border-b '
-                  : ' text-gray-700'
+                  ? 'text-gray-900 border-b'
+                  : 'text-gray-700'
               }`}
             >
               {cat}
@@ -73,9 +75,9 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
           </button>
         </div>
 
-        {/* Price Filters - visible on large screens or toggle active */}
+        {/* Price + Sort Filters */}
         <div
-          className={`flex-wrap gap-4 ${
+          className={`flex-wrap items-center gap-4 ${
             showPriceFilters ? 'flex' : 'hidden'
           } lg:flex`}
         >
@@ -93,6 +95,16 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
             onChange={(e) => setMaxPrice(e.target.value)}
             className="p-2 border rounded w-32"
           />
+
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as 'lowToHigh' | 'highToLow' | '')}
+            className="p-2 border rounded w-40"
+          >
+            <option value="">Sort By</option>
+            <option value="lowToHigh">Price: Low to High</option>
+            <option value="highToLow">Price: High to Low</option>
+          </select>
         </div>
       </div>
     </div>

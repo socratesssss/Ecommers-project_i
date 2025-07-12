@@ -102,12 +102,12 @@ const ProductPage = () => {
   };
 
   if (!product)
-    return <div className="p-10 text-center  md:pt-20 text-red-500">Product not found.</div>;
+    return <div className="p-10 text-center  text-red-500">Product not found.</div>;
 
   return (
-    <div className="px-4 lg:px-16 xl:px-32 2xl:px-64 py-4   md:pt-20 sm:py-10 flex flex-col md:flex-row gap-4 sm:gap-16">
+    <div className="px-4 lg:px-16 xl:px-32 2xl:px-64 py-4   md:pt-10 sm:py-10 flex flex-col md:flex-row gap-4 sm:gap-16">
       {/* Image Section */}
-      <div className="lg:sticky sm:w-1/2 h-max">
+      <div className="lg:sticky md:w-1/2 h-max">
         {/* Mobile Image Gallery */}
         <div
           className="lg:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth"
@@ -215,7 +215,7 @@ const ProductPage = () => {
       </div>
 
       {/* Text Section */}
-      <div className="flex sm:w-1/2 flex-col gap-4">
+      <div className="flex md:w-1/2 flex-col gap-4">
         <h1 className="text-3xl font-bold">{product.name}</h1>
         <p className="text-gray-500 text-sm">{product.miniDescription}</p>
         <div className="h-[2px] bg-gray-100" />

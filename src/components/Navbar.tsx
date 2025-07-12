@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X, ShoppingCart } from 'lucide-react';
 import { useSelector } from 'react-redux';
@@ -17,40 +17,9 @@ export default function Navbar() {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  const [show, setShow] = useState(true);
-  const lastScrollY = useRef(0);
-  const ticking = useRef(false);
-
-  const handleScroll = () => {
-    const currentScrollY = window.scrollY;
-
-    if (!ticking.current) {
-      window.requestAnimationFrame(() => {
-        if (currentScrollY > lastScrollY.current && currentScrollY > 250) {
-          setShow(false); // Hide on scroll down
-        } else if (currentScrollY < lastScrollY.current && currentScrollY > 250) {
-          setShow(true); // Show on scroll up
-        }
-        lastScrollY.current = currentScrollY;
-        ticking.current = false;
-      });
-
-      ticking.current = true;
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
-    <div
-      className={`w-full bg-gray-200 relative md:fixed top-0 left-0 z-30 shadow transition-transform duration-300 ${
-        show ? "translate-y-0" : "-translate-y-full"
-      }`}
-    >
-      <nav className="relative container mx-auto px-4 md:px-6 py-2 flex justify-between items-center">
+    <div className="w-full bg-gray-200 relative shadow">
+      <nav className="container mx-auto px-4 md:px-6 py-2 flex justify-between items-center">
         {/* Logo and mobile search */}
         <div className="flex items-center justify-between w-full md:w-auto">
           <div className="flex items-center gap-7">
@@ -70,9 +39,9 @@ export default function Navbar() {
 
         {/* Desktop menu */}
         <ul className="hidden md:flex space-x-6 text-gray-700 font-medium">
-          <li><Link href="/shop">Shop</Link></li>
+            <li><Link href="/" >Home</Link></li>
           <li><Link href="/orders">Orders</Link></li>
-          <li><Link href="/contact">Contact</Link></li>
+           <li><Link href="/all-carts" >Carts</Link></li>
           <li><Link href="/location">Location</Link></li>
         </ul>
 
@@ -107,9 +76,10 @@ export default function Navbar() {
         {isOpen && (
           <div className="absolute top-full left-0 w-full bg-white shadow-md md:hidden z-50">
             <ul className="flex flex-col space-y-4 p-4 text-gray-700 font-medium">
-              <li><Link href="/shop" onClick={() => setIsOpen(false)}>Shop</Link></li>
+                <li><Link href="/" onClick={() => setIsOpen(false)}>Home</Link></li>
               <li><Link href="/orders" onClick={() => setIsOpen(false)}>Orders</Link></li>
-              <li><Link href="/contact" onClick={() => setIsOpen(false)}>Contact</Link></li>
+                 <li><Link href="/all-carts" onClick={() => setIsOpen(false)}>Carts</Link></li>
+            
               <li><Link href="/location" onClick={() => setIsOpen(false)}>Location</Link></li>
               <li className="pt-2">
                 <div className="relative">
