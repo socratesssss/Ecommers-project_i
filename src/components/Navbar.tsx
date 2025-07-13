@@ -42,7 +42,7 @@ export default function Navbar() {
             <li><Link href="/" >Home</Link></li>
           <li><Link href="/orders">Orders</Link></li>
            <li><Link href="/all-carts" >Carts</Link></li>
-          <li><Link href="/location">Location</Link></li>
+          <li><Link href="/hsa8f8a8d"  className='line-through  '>Not-found</Link></li>
         </ul>
 
         {/* Desktop right icons */}
@@ -80,7 +80,7 @@ export default function Navbar() {
               <li><Link href="/orders" onClick={() => setIsOpen(false)}>Orders</Link></li>
                  <li><Link href="/all-carts" onClick={() => setIsOpen(false)}>Carts</Link></li>
             
-              <li><Link href="/location" onClick={() => setIsOpen(false)}>Location</Link></li>
+              <li><Link href="/n234n2jk53" onClick={() => setIsOpen(false)}>Not found</Link></li>
               <li className="pt-2">
                 <div className="relative">
                   <AnimatePresence>
