@@ -2,16 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
    images: {
-      domains: ['www.vaporzonebd.com','truthinitiative.org'],
-
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'www.vaporzonebd.com',
-        pathname: '/admin_assats/slider_images/**',
-      },
-    ]
+    domains: ['localhost'], // Add your backend hostname here
   },
+ 
   /* config options here */
 };
 

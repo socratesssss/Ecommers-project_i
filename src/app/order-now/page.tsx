@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -7,8 +7,9 @@ import AddressForm from '@/components/Delibary';
 import { saveAs } from 'file-saver';
 import Link from 'next/link';
 
-type OrderProduct = {
-  _id: string;
+// Types
+export type OrderProduct = {
+  _id: string | number;
   productName: { original: string };
   price: { amount: number };
   quantity: number;
@@ -16,7 +17,7 @@ type OrderProduct = {
   availability: { status: string };
 };
 
-type DeliveryDetails = {
+export type DeliveryDetails = {
   name: string;
   phone: string;
   email: string;
@@ -29,10 +30,10 @@ type DeliveryDetails = {
 
 const OrderNowPage = () => {
   const [product, setProduct] = useState<OrderProduct | null>(null);
-  const [quantity, setQuantity] = useState<number>(1);
-  const [deliveryCost, setDeliveryCost] = useState<number>(0);
+  const [quantity, setQuantity] = useState(1);
+  const [deliveryCost, setDeliveryCost] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'bkash'>('cod');
-  const [showSuccess, setShowSuccess] = useState<boolean>(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [deliveryDetails, setDeliveryDetails] = useState<DeliveryDetails>({
     name: '',
@@ -46,16 +47,32 @@ const OrderNowPage = () => {
   });
 
   useEffect(() => {
-    const stored = localStorage.getItem('orderNowProduct');
-    if (stored) {
-      const parsed: OrderProduct = JSON.parse(stored);
-      setProduct(parsed);
-      setQuantity(parsed.quantity || 1);
-    }
+    const fetchOrderProduct = async () => {
+      const stored = localStorage.getItem('orderNowProduct');
+      if (stored) {
+        const parsed: OrderProduct = JSON.parse(stored);
 
-    setTimeout(() => {
-      setDeliveryCost(15);
-    }, 300);
+        try {
+          const res = await fetch(`/api/products/${parsed._id}`);
+          if (!res.ok) throw new Error('Product not found');
+          const data = await res.json();
+
+          setProduct({
+            ...parsed,
+            price: { amount: data.discountPrice || data.price },
+            availability: { status: data.inStock ? 'In Stock' : 'Out of Stock' },
+            imageUrl: parsed.imageUrl || data.images?.[0] || '/placeholder.jpg',
+          });
+        } catch (error) {
+          setProduct(parsed); // fallback
+        }
+
+        setQuantity(parsed.quantity || 1);
+        setDeliveryCost(15);
+      }
+    };
+
+    fetchOrderProduct();
   }, []);
 
   const handleConfirm = () => {
@@ -104,9 +121,8 @@ const OrderNowPage = () => {
   if (!product) return <p className="p-8 text-center">No product selected.</p>;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 pb-14    space-y-10">
+    <div className="max-w-6xl mx-auto px-4 py-8 pb-14 space-y-10">
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Product Summary */}
         <section className="px-6 rounded-md shadow bg-white space-y-4">
           <div className="w-full aspect-[4/3] relative rounded-md overflow-hidden">
             <Image
@@ -135,7 +151,6 @@ const OrderNowPage = () => {
               ${product.price.amount.toFixed(2)}
             </p>
 
-            {/* Quantity Controls */}
             <div className="flex items-center gap-3 mt-4">
               <button
                 onClick={decreaseQuantity}
@@ -152,12 +167,8 @@ const OrderNowPage = () => {
               </button>
             </div>
 
-            {/* Delivery + Total */}
             <p className="mt-4 text-md">
-              Delivery Cost:{' '}
-              <span className="font-semibold text-blue-600">
-                ${deliveryCost.toFixed(2)}
-              </span>
+              Delivery Cost: <span className="font-semibold text-blue-600">${deliveryCost.toFixed(2)}</span>
             </p>
             <p className="text-md font-semibold">
               Total: ${(product.price.amount * quantity + deliveryCost).toFixed(2)}
@@ -165,51 +176,46 @@ const OrderNowPage = () => {
           </div>
         </section>
 
-        {/* Delivery and Payment */}
         <div className="space-y-6">
-          {/* Delivery Info */}
           <AddressForm form={deliveryDetails} setForm={setDeliveryDetails} />
 
-        {/* Payment Method */}
-      <section className="md:mt-10 mt-5  p-4 rounded-md shadow-sm bg-white">
-        <h2 className="text-xl font-bold mb-4 text-center"> Payment Method</h2>
-        <div className="flex gap-6">
-          <label className="flex items-center gap-2 text-sm md:text-base">
-            <input
-              type="radio"
-              name="payment"
-              value="cod"
-              checked={paymentMethod === 'cod'}
-              onChange={() => setPaymentMethod('cod')}
-            />
-            Cash on Delivery
-          </label>
-          <label className="flex items-center text-sm md:text-base gap-2">
-            <input
-              type="radio"
-              name="payment"
-              value="bkash"
-              checked={paymentMethod === 'bkash'}
-              onChange={() => setPaymentMethod('bkash')}
-            />
-            Bkash / Nagad
-          </label>
-        </div>
-      </section>
+          <section className="md:mt-10 mt-5 p-4 rounded-md shadow-sm bg-white">
+            <h2 className="text-xl font-bold mb-4 text-center">Payment Method</h2>
+            <div className="flex gap-6">
+              <label className="flex items-center gap-2 text-sm md:text-base">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="cod"
+                  checked={paymentMethod === 'cod'}
+                  onChange={() => setPaymentMethod('cod')}
+                />
+                Cash on Delivery
+              </label>
+              <label className="flex items-center text-sm md:text-base gap-2">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="bkash"
+                  checked={paymentMethod === 'bkash'}
+                  onChange={() => setPaymentMethod('bkash')}
+                />
+                Bkash / Nagad
+              </label>
+            </div>
+          </section>
         </div>
       </div>
 
-     {/* Confirm Button */}
       <div className="text-center mt-8">
         <button
           onClick={handleConfirm}
           className="bg-green-600 hover:bg-green-700 text-white font-semibold md:px-6 md:py-3 px-3 py-1.5 items-center rounded-md transition"
         >
-           Confirm Order
+          Confirm Order
         </button>
       </div>
 
-      {/* ✅ Success Modal */}
       {showSuccess && (
         <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-md text-center space-y-4">

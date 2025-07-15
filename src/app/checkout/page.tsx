@@ -8,17 +8,12 @@ import Image from 'next/image';
 import AddressForm from '@/components/Delibary';
 import { saveAs } from 'file-saver';
 import Link from 'next/link';
-// db
+
 const DELIVERY_COST = 60;
 
 const OrderPage = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.price.amount * item.quantity,
-    0
-  );
-  const grandTotal = subtotal + DELIVERY_COST;
 
   const [addressForm, setAddressForm] = useState({
     name: '',
@@ -33,43 +28,103 @@ const OrderPage = () => {
 
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleConfirm = () => {
-    const orderData = {
-      products: cartItems.map((item) => ({
-        id: item._id,
-        name: item.productName.original,
-        image: item.imageUrl,
-        quantity: item.quantity,
-        pricePerUnit: item.price.amount,
-        total: item.price.amount * item.quantity,
-      })),
-      address: addressForm,
-      deliveryCost: DELIVERY_COST,
-      subtotal,
-      total: grandTotal,
-      paymentMethod,
-      orderDate: new Date().toISOString(),
-    };
+  const handleConfirm = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/products');
+      const latestProducts = await res.json();
 
-    // Save to localStorage
-    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    const updatedOrders = [...existingOrders, orderData];
-    localStorage.setItem('orders', JSON.stringify(updatedOrders));
+      const validatedItems = cartItems.map((item) => {
+        const match = latestProducts.find((p: any) => p.id === parseInt(item._id));
+        return {
+          id: item._id,
+          name: item.productName.original,
+          image: item.imageUrl,
+          quantity: item.quantity,
+          pricePerUnit: match?.discountPrice || match?.price || item.price.amount,
+          inStock: match?.inStock ?? true,
+        };
+      });
 
-    // Save as file
-    const blob = new Blob([JSON.stringify(orderData, null, 2)], {
-      type: 'application/json',
-    });
-    saveAs(blob, `order-${Date.now()}.json`);
+      const unavailable = validatedItems.find((item) => !item.inStock);
+      if (unavailable) {
+        alert(`❌ ${unavailable.name} is out of stock. Please update your cart.`);
+        setLoading(false);
+        return;
+      }
 
-    // Clear cart and show modal
-    dispatch(clearCart());
-    setShowSuccess(true);
+      const subtotal = validatedItems.reduce((acc, item) => acc + item.pricePerUnit * item.quantity, 0);
+      const total = subtotal + DELIVERY_COST;
+
+      const orderData = {
+        products: validatedItems.map((item) => ({
+          ...item,
+          total: item.pricePerUnit * item.quantity,
+        })),
+        address: addressForm,
+        deliveryCost: DELIVERY_COST,
+        subtotal,
+        total,
+        paymentMethod,
+        orderDate: new Date().toISOString(),
+      };
+
+      const blob = new Blob([JSON.stringify(orderData, null, 2)], {
+        type: 'application/json',
+      });
+      saveAs(blob, `order-${Date.now()}.json`);
+
+      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+      localStorage.setItem('orders', JSON.stringify([...existingOrders, orderData]));
+
+      dispatch(clearCart());
+      setShowSuccess(true);
+    } catch (err) {
+      alert('⚠️ Failed to validate product data. Placing order with current cart items.');
+
+      const subtotal = cartItems.reduce(
+        (acc, item) => acc + item.price.amount * item.quantity,
+        0
+      );
+
+      const orderData = {
+        products: cartItems.map((item) => ({
+          id: item._id,
+          name: item.productName.original,
+          image: item.imageUrl,
+          quantity: item.quantity,
+          pricePerUnit: item.price.amount,
+          total: item.price.amount * item.quantity,
+        })),
+        address: addressForm,
+        deliveryCost: DELIVERY_COST,
+        subtotal,
+        total: subtotal + DELIVERY_COST,
+        paymentMethod,
+        orderDate: new Date().toISOString(),
+      };
+
+      const blob = new Blob([JSON.stringify(orderData, null, 2)], {
+        type: 'application/json',
+      });
+      saveAs(blob, `order-${Date.now()}.json`);
+      dispatch(clearCart());
+      setShowSuccess(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + item.price.amount * item.quantity,
+    0
+  );
+  const grandTotal = subtotal + DELIVERY_COST;
+
   return (
-    <div className="max-w-6xl mx-auto px-4    py-8">
+    <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Product Summary */}
         <section className="p-4 rounded-md shadow-sm bg-white">
@@ -142,20 +197,19 @@ const OrderPage = () => {
       <div className="text-center mt-8">
         <button
           onClick={handleConfirm}
+          disabled={cartItems.length === 0 || loading}
           className="bg-green-600 hover:bg-green-700 text-white font-semibold md:px-6 md:py-3 px-3 py-1.5 items-center rounded-md transition"
         >
-           Confirm Order
+          {loading ? 'Processing...' : 'Confirm Order'}
         </button>
       </div>
 
       {/* ✅ Success Modal */}
       {showSuccess && (
-        <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-md text-center space-y-4">
-            <h2 className="text-2xl font-bold text-green-600">Order Successful!</h2>
-            <p className="text-gray-700">
-              Your order has been placed and saved to your device.
-            </p>
+            <h2 className="text-2xl font-bold text-green-600">🎉 Order Successful!</h2>
+            <p className="text-gray-700">Your order has been placed and saved successfully.</p>
             <Link
               href="/"
               className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"

@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '@/redux/cartSlice';
 
 type ProductCardProps = {
-  id: number;
+  id: string | number;
   images: string[];
   name: string;
   price: number;
@@ -45,7 +45,7 @@ export default function ProductCard({
     discountPrice && discountPrice < price
       ? Math.round(((price - discountPrice) / price) * 100)
       : 0;
-
+console.log(id)
   return (
     <div className="relative bg-white     rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 p-2">
       {animate && (

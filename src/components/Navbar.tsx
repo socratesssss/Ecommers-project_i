@@ -7,7 +7,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import SearchBox from './SearchBox';
 import CartModel from './CartModel';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
@@ -24,7 +23,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between w-full md:w-auto">
           <div className="flex items-center gap-7">
             <Link href="/" className="text-2xl font-bold text-black whitespace-nowrap">
-              <Image src="/logoo.png" width={18} height={18} alt="Logo" />
+              {/* <Image src="/logoo.png" width={18} height={18} alt="Logo" /> */}
+              LOGO
             </Link>
           </div>
 

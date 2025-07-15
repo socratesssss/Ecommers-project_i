@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -23,7 +22,16 @@ const OrdersPage = () => {
 
   useEffect(() => {
     const stored = localStorage.getItem('orders');
-    if (stored) setOrders(JSON.parse(stored));
+    if (stored) {
+      const parsedOrders: Order[] = JSON.parse(stored);
+
+      // Sort by latest first
+      const sortedOrders = parsedOrders.sort(
+        (a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
+      );
+
+      setOrders(sortedOrders);
+    }
   }, []);
 
   if (orders.length === 0) {
@@ -31,22 +39,23 @@ const OrdersPage = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto  p-4 space-y-8 ">
+    <div className="max-w-5xl mx-auto p-4 space-y-8">
       <h1 className="text-2xl font-bold mb-4 text-center">My Orders</h1>
 
       {orders.map((order, index) => (
         <section
           key={index}
-          className="   bg-white border-y border-gray-200 space-y-4"
+          className="bg-white border-y border-gray-200 space-y-4"
         >
           <h2 className="text-lg font-semibold text-gray-700">
-           {new Date(order.orderDate).toLocaleString('en-US', {
-  day: 'numeric',
-  month: 'long',
-  hour: 'numeric',
-  minute: '2-digit',
-  hour12: true,
-})}
+            {new Date(order.orderDate).toLocaleString('en-US', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            })}
           </h2>
 
           {order.products?.map((item: OrderItem, idx: number) => (
@@ -81,4 +90,3 @@ const OrdersPage = () => {
 };
 
 export default OrdersPage;
-

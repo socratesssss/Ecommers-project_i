@@ -3,27 +3,37 @@
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 
-const images = [
-  'https://www.vaporzonebd.com/admin_assats/slider_images/1726170721-Vapor-Zone.webp',
-  'https://www.vaporzonebd.com/admin_assats/slider_images/1680163798-Vapor-Zone.webp',
-  'https://www.vaporzonebd.com/admin_assats/slider_images/1680165428-Vapor-Zone.webp',
-  // Add more if needed
-];
-
 export default function Banner() {
+  const [banners, setBanners] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
   useEffect(() => {
+    // Fetch banners from API
+    const fetchBanners = async () => {
+      try {
+        const res = await fetch('http://localhost:3000//api/banners');
+        const data = await res.json();
+        setBanners(data);
+      } catch (error) {
+        console.error('Failed to fetch banners:', error);
+      }
+    };
+
+    fetchBanners();
+  }, []);
+
+  // Auto-slide every 5 seconds
+  useEffect(() => {
+    if (banners.length === 0) return;
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) =>
-        prevIndex === images.length - 1 ? 0 : prevIndex + 1
+        prevIndex === banners.length - 1 ? 0 : prevIndex + 1
       );
     }, 5000);
-
     return () => clearInterval(interval);
-  }, []);
+  }, [banners]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
@@ -39,14 +49,18 @@ export default function Banner() {
 
     if (deltaX > 50) {
       setCurrentIndex((prevIndex) =>
-        prevIndex === images.length - 1 ? 0 : prevIndex + 1
+        prevIndex === banners.length - 1 ? 0 : prevIndex + 1
       );
     } else if (deltaX < -50) {
       setCurrentIndex((prevIndex) =>
-        prevIndex === 0 ? images.length - 1 : prevIndex - 1
+        prevIndex === 0 ? banners.length - 1 : prevIndex - 1
       );
     }
   };
+
+  if (banners.length === 0) {
+    return <div className="text-center p-6 text-gray-500">Loading banners...</div>;
+  }
 
   return (
     <div className="relative w-full mx-auto overflow-hidden">
@@ -57,7 +71,7 @@ export default function Banner() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {images.map((src, idx) => (
+        {banners.map((src, idx) => (
           <div key={idx} className="w-full flex-shrink-0 h-[200px] md:h-[400px] relative">
             <Image
               src={src}
@@ -65,7 +79,7 @@ export default function Banner() {
               fill
               className="object-cover"
               sizes="100vw"
-              priority={idx === 0} // load first image eagerly
+              priority={idx === 0}
             />
           </div>
         ))}
@@ -73,7 +87,7 @@ export default function Banner() {
 
       {/* Dotted Navigation */}
       <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2">
-        {images.map((_, idx) => (
+        {banners.map((_, idx) => (
           <button
             key={idx}
             onClick={() => goToSlide(idx)}

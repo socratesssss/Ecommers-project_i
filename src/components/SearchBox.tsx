@@ -3,18 +3,41 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { products } from '@/db/product';
+
+type Product = {
+  id: number | string;
+  name: string;
+};
 
 type SearchBoxProps = {
   className?: string;
-  onSearchComplete?: () => void; // ✅ New prop
+  onSearchComplete?: () => void;
 };
 
 const SearchBox: React.FC<SearchBoxProps> = ({ className = '', onSearchComplete }) => {
   const router = useRouter();
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch('http://localhost:4000/api/product');
+        if (!res.ok) throw new Error('Failed to fetch products');
+        const data: Product[] = await res.json();
+
+        // Normalize id to string just in case
+        const normalized = data.map(p => ({ ...p, id: String(p.id || p._id) }));
+        setProducts(normalized);
+      } catch (error) {
+        console.error(error);
+        setProducts([]);
+      }
+    }
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
     if (query.trim() === '') {
@@ -24,18 +47,14 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = '', onSearchComplete 
 
     const filtered = products
       .filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
-      .slice(0, 5)
-      .map((p) => p.name);
+      .slice(0, 5);
 
     setSuggestions(filtered);
-  }, [query]);
+  }, [query, products]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setSuggestions([]);
       }
     };
@@ -43,13 +62,20 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = '', onSearchComplete 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSearch = (searchTerm: string) => {
-    if (searchTerm.trim()) {
-      router.push(`/list?name=${encodeURIComponent(searchTerm.trim())}`);
+  const handleSearch = (productName: string) => {
+    if (productName.trim()) {
+      router.push(`/list?name=${encodeURIComponent(productName.trim())}`);
       setSuggestions([]);
       setQuery('');
-      if (onSearchComplete) onSearchComplete(); // ✅ Close overlay after search
+      if (onSearchComplete) onSearchComplete();
     }
+  };
+
+  const handleSuggestionClick = (product: Product) => {
+    router.push(`/products/${product.id}`);
+    setSuggestions([]);
+    setQuery('');
+    if (onSearchComplete) onSearchComplete();
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -69,24 +95,20 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = '', onSearchComplete 
           className="w-full pl-3 pr-8 py-1.5 text-sm outline-none rounded-md"
           autoComplete="off"
         />
-        <button
-          type="submit"
-          aria-label="Search"
-          className="absolute right-1 top-1.5 text-gray-900"
-        >
+        <button type="submit" aria-label="Search" className="absolute right-1 top-1.5 text-gray-900">
           <Search className="w-4 h-4 cursor-pointer" />
         </button>
       </form>
 
       {suggestions.length > 0 && (
         <ul className="absolute z-10 bg-white border rounded-md mt-1 w-full max-h-48 overflow-y-auto shadow-md text-sm">
-          {suggestions.map((suggestion) => (
+          {suggestions.map((product) => (
             <li
-              key={suggestion}
+              key={product.id}
               className="px-3 py-2 hover:bg-blue-100 cursor-pointer"
-              onClick={() => handleSearch(suggestion)}
+              onClick={() => handleSuggestionClick(product)}
             >
-              {suggestion}
+              {product.name}
             </li>
           ))}
         </ul>
