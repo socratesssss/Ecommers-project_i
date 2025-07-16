@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '@/redux/cartSlice';
 
 type ProductCardProps = {
-  id: string | number;
+  id: string;
   images: string[];
   name: string;
   price: number;

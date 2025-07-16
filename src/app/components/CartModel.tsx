@@ -6,12 +6,17 @@ import { removeFromCart, adjustQuantity } from "@/redux/cartSlice";
 import Image from "next/image";
 import { Minus, Plus, X } from "lucide-react";
 import Link from "next/link";
+import axios from "axios";
 
 const CartModel = () => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(true);
   const cartRef = useRef<HTMLDivElement>(null);
+
+  const [productStatusMap, setProductStatusMap] = useState<
+    Record<string, { exists: boolean; inStock: boolean }>
+  >({});
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price.amount * item.quantity,
@@ -29,6 +34,34 @@ const CartModel = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+  // validate cart itam
+useEffect(() => {
+  const fetchProductStatus = async () => {
+    const statusMap: Record<string, { exists: boolean; inStock: boolean }> = {};
+
+    await Promise.all(
+      cartItems.map(async (item) => {
+        try {
+          const res = await axios.get(`http://localhost:4000/api/product/${item._id}`);
+          statusMap[item._id] = {
+            exists: true,
+            inStock: res.data.inStock,
+          };
+        } catch (err) {
+          statusMap[item._id] = {
+            exists: false,
+            inStock: false,
+          };
+        }
+      })
+    );
+
+    setProductStatusMap(statusMap);
+  };
+
+  if (cartItems.length > 0) fetchProductStatus();
+}, [cartItems]);
+
 
   if (!isOpen) return null;
 
@@ -85,6 +118,8 @@ const CartModel = () => {
 
           <div className="flex flex-col gap-4 max-h-[60vh] md:max-h-80 overflow-y-auto pr-2">
             {cartItems.map((item) => {
+              const status = productStatusMap[item._id];
+             
               return (
                 // single card
                 <div
@@ -104,6 +139,24 @@ const CartModel = () => {
                         <h3 className="font-semibold text-sm line-clamp-2">
                           {item.productName.original}
                         </h3>
+
+                        {status && (
+                          <span
+                            className={`text-[12px] mt-1 inline-block ${
+                              !status.exists
+                                ? "text-red-500"
+                                : !status.inStock
+                                ? "text-yellow-500"
+                                : "text-green-500"
+                            }`}
+                          >
+                            {!status.exists
+                              ? "Unavailable"
+                              : !status.inStock
+                              ? "Stock out"
+                              : "Available"}
+                          </span>
+                        )}
                       </div>
 
                       <span className="text-gray-500 text-[13px]">
@@ -116,13 +169,18 @@ const CartModel = () => {
                         <button
                           onClick={() => handleQtyChange(item._id, "dec")}
                           className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center"
-                          disabled={item.quantity <= 1}
+                          disabled={
+                            !status?.exists ||
+                            !status?.inStock ||
+                            item.quantity <= 1
+                          }
                           aria-label="Decrease quantity"
                         >
                           <Minus size={14} />
                         </button>
                         <span>{item.quantity}</span>
                         <button
+                          disabled={!status?.exists || !status?.inStock}
                           onClick={() => handleQtyChange(item._id, "inc")}
                           className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center"
                           aria-label="Increase quantity"
@@ -167,11 +225,20 @@ const CartModel = () => {
               <button className="flex-1  hidden rounded-md py-3 px-4 ring-1 ring-gray-300 hover:bg-gray-50">
                 View Cart
               </button>
-              <Link href="/checkout" onClick={() =>{ setIsOpen(() => false)}}
- className=" flex-1 rounded-md py-3 px-4 text-center bg-black text-white hover:bg-gray-800">
-                Checkout
-              </Link>
-              
+          <Link
+  href="/checkout"
+  onClick={() => {
+    const validItems = cartItems.filter(item => {
+      const status = productStatusMap[item._id];
+      return status?.exists && status?.inStock;
+    });
+    localStorage.setItem("checkoutItems", JSON.stringify(validItems));
+  }}
+  className="flex-1 rounded-md py-3 px-4 bg-black text-white hover:bg-gray-800 text-center"
+>
+  Checkout
+</Link>
+
             </div>
           </div>
         </>

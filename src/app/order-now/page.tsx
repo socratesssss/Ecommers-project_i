@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { Minus, Plus } from 'lucide-react';
-import AddressForm from '@/components/Delibary';
-import { saveAs } from 'file-saver';
-import Link from 'next/link';
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import { Minus, Plus } from "lucide-react";
+import AddressForm from "@/app/components/Delibary";
+import { saveAs } from "file-saver";
+import Link from "next/link";
 
 // Types
 export type OrderProduct = {
@@ -32,36 +32,46 @@ const OrderNowPage = () => {
   const [product, setProduct] = useState<OrderProduct | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [deliveryCost, setDeliveryCost] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'bkash'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "bkash">("cod");
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const [deliveryDetails, setDeliveryDetails] = useState<DeliveryDetails>({
-    name: '',
-    phone: '',
-    email: '',
-    country: 'UAE',
-    emirate: '',
-    city: '',
-    district: '',
-    road: '',
+  const [form, setForm] = useState<DeliveryDetails>(() => {
+    const saved = localStorage.getItem("deliveryForm");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          name: "",
+          phone: "",
+          email: "",
+          country: "UAE",
+          emirate: "",
+          city: "",
+          district: "",
+          road: "",
+        };
   });
+  useEffect(() => {
+    localStorage.setItem("deliveryForm", JSON.stringify(form));
+  }, [form]);
 
   useEffect(() => {
     const fetchOrderProduct = async () => {
-      const stored = localStorage.getItem('orderNowProduct');
+      const stored = localStorage.getItem("orderNowProduct");
       if (stored) {
         const parsed: OrderProduct = JSON.parse(stored);
 
         try {
           const res = await fetch(`/api/products/${parsed._id}`);
-          if (!res.ok) throw new Error('Product not found');
+          if (!res.ok) throw new Error("Product not found");
           const data = await res.json();
 
           setProduct({
             ...parsed,
             price: { amount: data.discountPrice || data.price },
-            availability: { status: data.inStock ? 'In Stock' : 'Out of Stock' },
-            imageUrl: parsed.imageUrl || data.images?.[0] || '/placeholder.jpg',
+            availability: {
+              status: data.inStock ? "In Stock" : "Out of Stock",
+            },
+            imageUrl: parsed.imageUrl || data.images?.[0] || "/placeholder.jpg",
           });
         } catch (error) {
           setProduct(parsed); // fallback
@@ -87,7 +97,7 @@ const OrderNowPage = () => {
         quantity,
         total: quantity * product.price.amount,
       },
-      deliveryDetails,
+      deliveryDetails: form,
       paymentMethod,
       deliveryCost,
       total: quantity * product.price.amount + deliveryCost,
@@ -95,28 +105,34 @@ const OrderNowPage = () => {
     };
 
     const blob = new Blob([JSON.stringify(fullOrder, null, 2)], {
-      type: 'application/json',
+      type: "application/json",
     });
     saveAs(blob, `order-now-${Date.now()}.json`);
 
+    // ✅ Clear localStorage BEFORE clearing form
+    localStorage.removeItem("deliveryForm");
+    localStorage.removeItem("orderNowProduct");
+
+    // Reset state
     setShowSuccess(true);
     setQuantity(1);
-    setDeliveryDetails({
-      name: '',
-      phone: '',
-      email: '',
-      country: 'UAE',
-      emirate: '',
-      city: '',
-      district: '',
-      road: '',
+    setPaymentMethod("cod");
+
+    setForm({
+      name: "",
+      phone: "",
+      email: "",
+      country: "UAE",
+      emirate: "",
+      city: "",
+      district: "",
+      road: "",
     });
-    setPaymentMethod('cod');
-    localStorage.removeItem('orderNowProduct');
   };
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
-  const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  const decreaseQuantity = () =>
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   if (!product) return <p className="p-8 text-center">No product selected.</p>;
 
@@ -134,14 +150,16 @@ const OrderNowPage = () => {
           </div>
 
           <div>
-            <h3 className="font-semibold text-lg">{product.productName.original}</h3>
+            <h3 className="font-semibold text-lg">
+              {product.productName.original}
+            </h3>
             <p className="text-gray-500 text-sm mt-1">
-              Availability:{' '}
+              Availability:{" "}
               <span
                 className={
-                  product.availability.status === 'In Stock'
-                    ? 'text-green-600'
-                    : 'text-red-500'
+                  product.availability.status === "In Stock"
+                    ? "text-green-600"
+                    : "text-red-500"
                 }
               >
                 {product.availability.status}
@@ -168,27 +186,33 @@ const OrderNowPage = () => {
             </div>
 
             <p className="mt-4 text-md">
-              Delivery Cost: <span className="font-semibold text-blue-600">${deliveryCost.toFixed(2)}</span>
+              Delivery Cost:{" "}
+              <span className="font-semibold text-blue-600">
+                ${deliveryCost.toFixed(2)}
+              </span>
             </p>
             <p className="text-md font-semibold">
-              Total: ${(product.price.amount * quantity + deliveryCost).toFixed(2)}
+              Total: $
+              {(product.price.amount * quantity + deliveryCost).toFixed(2)}
             </p>
           </div>
         </section>
 
         <div className="space-y-6">
-          <AddressForm form={deliveryDetails} setForm={setDeliveryDetails} />
+          <AddressForm form={form} setForm={setForm} />
 
           <section className="md:mt-10 mt-5 p-4 rounded-md shadow-sm bg-white">
-            <h2 className="text-xl font-bold mb-4 text-center">Payment Method</h2>
+            <h2 className="text-xl font-bold mb-4 text-center">
+              Payment Method
+            </h2>
             <div className="flex gap-6">
               <label className="flex items-center gap-2 text-sm md:text-base">
                 <input
                   type="radio"
                   name="payment"
                   value="cod"
-                  checked={paymentMethod === 'cod'}
-                  onChange={() => setPaymentMethod('cod')}
+                  checked={paymentMethod === "cod"}
+                  onChange={() => setPaymentMethod("cod")}
                 />
                 Cash on Delivery
               </label>
@@ -197,8 +221,8 @@ const OrderNowPage = () => {
                   type="radio"
                   name="payment"
                   value="bkash"
-                  checked={paymentMethod === 'bkash'}
-                  onChange={() => setPaymentMethod('bkash')}
+                  checked={paymentMethod === "bkash"}
+                  onChange={() => setPaymentMethod("bkash")}
                 />
                 Bkash / Nagad
               </label>
@@ -219,8 +243,12 @@ const OrderNowPage = () => {
       {showSuccess && (
         <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-md text-center space-y-4">
-            <h2 className="text-2xl font-bold text-green-600">🎉 Order Successful!</h2>
-            <p className="text-gray-700">Your order has been placed and saved successfully.</p>
+            <h2 className="text-2xl font-bold text-green-600">
+              🎉 Order Successful!
+            </h2>
+            <p className="text-gray-700">
+              Your order has been placed and saved successfully.
+            </p>
             <Link
               href="/"
               className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"

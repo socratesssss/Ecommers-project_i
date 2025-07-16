@@ -1,16 +1,12 @@
-import Navbar from "@/components/Navbar";
-import BotNavMob from "@/components/BotNavMob";
-const RootLayout = ({children,}: Readonly<{children: React.ReactNode;}>) => {
+import Navbar from "@/app/components/Navbar";
+import BotNavMob from "@/app/components/BotNavMob";
+const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   return (
-<div>
- <Navbar />
-          {children}
-          <BotNavMob />
-</div>
-       
-         
-        
-   
+    <div>
+      <Navbar />
+      {children}
+      <BotNavMob />
+    </div>
   );
 };
 

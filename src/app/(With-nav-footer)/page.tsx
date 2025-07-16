@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
-import ProductCard from '@/components/Card';
-import Banner from '@/components/Banner';
-import ProductFilter from '@/components/categoryfilterring';
+import React, { useEffect, useState } from "react";
+import ProductCard from "../components/Card";
+import Banner from "../components/Banner";
+import ProductFilter from "../components/categoryfilterring";
+import Pagination from "../components/Pagination";
 
 type ProductColor = {
   color: string;
@@ -15,7 +16,7 @@ type Product = {
   name: string;
   price: number;
   discountPrice?: number;
-  category: 'Vape' | 'Juice' | 'Pods';
+  category: "Vape" | "Juice" | "Pods";
   images: string[];
   inStock: boolean;
   miniDescription: string;
@@ -27,84 +28,106 @@ type Filters = {
   categories: string[];
   minPrice: number;
   maxPrice: number;
-  sortOrder: 'lowToHigh' | 'highToLow' | '';
+  sortOrder: "lowToHigh" | "highToLow" | "";
 };
 
 const HomePage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<Filters>({
     categories: [],
     minPrice: 0,
     maxPrice: Infinity,
-    sortOrder: '',
+    sortOrder: "",
   });
 
+
+
+  // Reset page to 1 when filters change
   useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
+ useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true);
+      const query = new URLSearchParams();
+
+      query.append("page", currentPage.toString());
+      query.append("limit", itemsPerPage.toString());
+
+      if (filters.categories.length > 0) {
+        query.append("categories", filters.categories.join(","));
+      }
+      query.append("minPrice", filters.minPrice.toString());
+      query.append("maxPrice", filters.maxPrice.toString());
+      query.append("sortOrder", filters.sortOrder);
+
+      // **Add search term param here**
+      if (searchTerm.trim()) {
+        query.append("q", searchTerm.trim());
+      }
+
       try {
-        const res = await fetch('http://localhost:4000/api/product'); // adjust this if your route is different
+        const res = await fetch(`http://localhost:4000/api/product?${query.toString()}`);
         const data = await res.json();
-        setProducts(data);
+
+        setProducts(data.products || []);
+        setTotalPages(data.totalPages || 1);
       } catch (error) {
-        console.error('Failed to fetch products:', error);
+        console.error("Failed to fetch products:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
-
-  const filteredProducts = useMemo(() => {
-    const result = products.filter((product: Product) => {
-      const price = product.discountPrice || product.price;
-      const matchesCategory =
-        filters.categories.length === 0 || filters.categories.includes(product.category);
-      const matchesPrice = price >= filters.minPrice && price <= filters.maxPrice;
-      return matchesCategory && matchesPrice;
-    });
-
-    if (filters.sortOrder === 'lowToHigh') {
-      result.sort((a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
-    } else if (filters.sortOrder === 'highToLow') {
-      result.sort((a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
-    }
-
-    return result;
-  }, [filters, products]);
+  }, [currentPage, filters, searchTerm]);
 
   return (
     <div>
       <Banner />
       <ProductFilter onFilterChange={setFilters} />
+
       {loading ? (
         <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="text-center space-y-3">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
-        
-      </div>
-    </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 mx-auto px-4 md:px-6 py-10 container gap-3">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((item,index) => (
-            
-              <ProductCard
-                key={item._id || index}
-                id={item._id}
-                images={item.images}
-                name={item.name}
-                inStock={item.inStock}
-                discountPrice={item.discountPrice}
-                price={item.price}
-              />
-            ))
-          ) : (
-            <p className="text-center col-span-full text-gray-500">No products found.</p>
-          )}
+          <div className="text-center space-y-3">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          </div>
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 mx-auto px-4 md:px-6 py-10 container gap-3">
+            {products.length > 0 ? (
+              products.map((item, index) => (
+                <ProductCard
+                  key={item._id || index}
+                  id={item._id}
+                  images={item.images}
+                  name={item.name}
+                  inStock={item.inStock}
+                  discountPrice={item.discountPrice}
+                  price={item.price}
+                />
+              ))
+            ) : (
+              <p className="text-center col-span-full text-gray-500">No products found.</p>
+            )}
+          </div>
+
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
+        </>
       )}
     </div>
   );

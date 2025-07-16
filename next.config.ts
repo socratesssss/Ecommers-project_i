@@ -1,9 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-   images: {
-    domains: ['localhost'], // Add your backend hostname here
-  },
+images: {
+  remotePatterns: [
+    {
+      protocol: 'http',
+      hostname: 'localhost',
+      port: '4000',
+      pathname: '/uploads/**',
+    },
+  ],
+},
+
  
   /* config options here */
 };

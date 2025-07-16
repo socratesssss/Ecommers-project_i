@@ -14,6 +14,10 @@ type FilterProps = {
 
 const categories = ['All', 'Juice', 'Vape', 'Pods'];
 
+
+
+
+
 const ProductFilter = ({ onFilterChange }: FilterProps) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['All']);
   const [minPrice, setMinPrice] = useState('');
@@ -22,26 +26,52 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
   const [showPriceFilters, setShowPriceFilters] = useState(false);
 
   useEffect(() => {
+    // Prepare categories array for backend
+    const categoriesForFilter =
+      selectedCategories.includes('All') || selectedCategories.length === 0
+        ? []
+        : selectedCategories;
+
     onFilterChange({
-      categories:
-        selectedCategories.includes('All') || selectedCategories.length === 0
-          ? []
-          : selectedCategories,
-      minPrice: minPrice === '' ? 0 : +minPrice,
-      maxPrice: maxPrice === '' ? Infinity : +maxPrice,
+      categories: categoriesForFilter,
+      minPrice: minPrice === '' || Number(minPrice) < 0 ? 0 : Number(minPrice),
+      maxPrice:
+        maxPrice === '' || Number(maxPrice) < 0
+          ? Infinity
+          : Number(maxPrice),
       sortOrder,
     });
   }, [selectedCategories, minPrice, maxPrice, sortOrder, onFilterChange]);
 
   const handleCategoryChange = (category: string) => {
     if (category === 'All') {
+      // Select only All
       setSelectedCategories(['All']);
     } else {
-      const updated = selectedCategories.includes(category)
-        ? selectedCategories.filter((c) => c !== category)
-        : [...selectedCategories.filter((c) => c !== 'All'), category];
+      // Select/deselect category
+      let updated: string[];
+      if (selectedCategories.includes(category)) {
+        // Remove category
+        updated = selectedCategories.filter((c) => c !== category);
+      } else {
+        // Add category
+        updated = [...selectedCategories.filter((c) => c !== 'All'), category];
+      }
+      // If nothing selected, revert to All
+      if (updated.length === 0) updated = ['All'];
       setSelectedCategories(updated);
     }
+  };
+
+  // Optional: Restrict input to positive numbers for price fields
+  const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (/^\d*$/.test(val)) setMinPrice(val);
+  };
+
+  const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (/^\d*$/.test(val)) setMaxPrice(val);
   };
 
   return (
@@ -53,22 +83,24 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
             <button
               key={cat}
               onClick={() => handleCategoryChange(cat)}
-              className={`text-sm ${
+              className={`text-sm px-2 py-1 border-b-2 ${
                 selectedCategories.includes(cat)
-                  ? 'text-gray-900 border-b'
-                  : 'text-gray-700'
-              }`}
+                  ? 'text-gray-900 border-blue-600'
+                  : 'text-gray-700 border-transparent hover:border-gray-400'
+              } transition-colors`}
+              type="button"
             >
               {cat}
             </button>
           ))}
         </div>
 
-        {/* Toggler for price filter on small devices */}
+        {/* Toggle price filter on small screens */}
         <div className="flex justify-between items-center lg:hidden">
           <button
             onClick={() => setShowPriceFilters(!showPriceFilters)}
             className="flex items-center gap-1 text-sm text-gray-600 border border-gray-300 px-3 py-1 rounded-md"
+            type="button"
           >
             <SlidersHorizontal className="w-4 h-4" />
             Filters
@@ -82,23 +114,27 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
           } lg:flex`}
         >
           <input
-            type="number"
+            type="text"
             placeholder="Min Price"
             value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
+            onChange={handleMinPriceChange}
             className="p-2 border rounded w-32"
+            inputMode="numeric"
           />
           <input
-            type="number"
+            type="text"
             placeholder="Max Price"
             value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
+            onChange={handleMaxPriceChange}
             className="p-2 border rounded w-32"
+            inputMode="numeric"
           />
 
           <select
             value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value as 'lowToHigh' | 'highToLow' | '')}
+            onChange={(e) =>
+              setSortOrder(e.target.value as 'lowToHigh' | 'highToLow' | '')
+            }
             className="p-2 border rounded w-40"
           >
             <option value="">Sort By</option>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Menu, X, ShoppingCart } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
@@ -10,11 +11,20 @@ import CartModel from './CartModel';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
+  // This runs when user submits or clicks suggestion in SearchBox
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      // Navigate to search results page with query param
+      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+    }
+  };
 
   return (
     <div className="w-full bg-gray-200 relative shadow">
@@ -23,7 +33,6 @@ export default function Navbar() {
         <div className="flex items-center justify-between w-full md:w-auto">
           <div className="flex items-center gap-7">
             <Link href="/" className="text-2xl font-bold text-black whitespace-nowrap">
-              {/* <Image src="/logoo.png" width={18} height={18} alt="Logo" /> */}
               LOGO
             </Link>
           </div>
@@ -39,15 +48,16 @@ export default function Navbar() {
 
         {/* Desktop menu */}
         <ul className="hidden md:flex space-x-6 text-gray-700 font-medium">
-            <li><Link href="/" >Home</Link></li>
+          <li><Link href="/">Home</Link></li>
           <li><Link href="/orders">Orders</Link></li>
-           <li><Link href="/all-carts" >Carts</Link></li>
-          <li><Link href="/hsa8f8a8d"  className='line-through  '>Not-found</Link></li>
+          <li><Link href="/all-carts">Carts</Link></li>
+          <li><Link href="/hsa8f8a8d" className="line-through">Not-found</Link></li>
         </ul>
 
         {/* Desktop right icons */}
         <div className="hidden md:flex items-center space-x-6">
-          <SearchBox />
+          {/* Pass the handler here */}
+          <SearchBox onSearch={handleSearch} />
           <div className="relative">
             <AnimatePresence>
               <button aria-label="Cart" onClick={() => setIsCartOpen(prev => !prev)}>
@@ -76,10 +86,9 @@ export default function Navbar() {
         {isOpen && (
           <div className="absolute top-full left-0 w-full bg-white shadow-md md:hidden z-50">
             <ul className="flex flex-col space-y-4 p-4 text-gray-700 font-medium">
-                <li><Link href="/" onClick={() => setIsOpen(false)}>Home</Link></li>
+              <li><Link href="/" onClick={() => setIsOpen(false)}>Home</Link></li>
               <li><Link href="/orders" onClick={() => setIsOpen(false)}>Orders</Link></li>
-                 <li><Link href="/all-carts" onClick={() => setIsOpen(false)}>Carts</Link></li>
-            
+              <li><Link href="/all-carts" onClick={() => setIsOpen(false)}>Carts</Link></li>
               <li><Link href="/n234n2jk53" onClick={() => setIsOpen(false)}>Not found</Link></li>
               <li className="pt-2">
                 <div className="relative">
