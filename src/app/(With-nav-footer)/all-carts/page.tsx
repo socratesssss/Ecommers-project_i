@@ -10,6 +10,7 @@ import Link from "next/link";
 import axios from "axios";
 
 const CartPage = () => {
+  const port = 'http://localhost:4000'
   const cartItems = useSelector(
     (state: RootState) => state.cart.items as CartItem[]
   );
@@ -40,7 +41,7 @@ const CartPage = () => {
         cartItems.map(async (item) => {
           try {
             const res = await axios.get(
-              `http://localhost:4000/api/product/${item._id}`
+              `${port}/api/product/${item._id}`
             );
             statusMap[item._id] = {
               exists: true,
@@ -51,6 +52,7 @@ const CartPage = () => {
               exists: false,
               inStock: false,
             };
+            return err
           }
         })
       );

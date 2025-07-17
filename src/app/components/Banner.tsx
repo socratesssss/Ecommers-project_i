@@ -3,9 +3,19 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 
+
+type Banner = {
+  _id: string;
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+
 export default function Banner() {
+    const port = 'http://localhost:4000'
   // banners is an array of strings (URLs)
-  const [banners, setBanners] = useState<string[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
@@ -14,9 +24,9 @@ export default function Banner() {
     // Fetch banners from API on mount
     const fetchBanners = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/banners');
+        const res = await fetch(`${port}/api/banners`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data: string[] = await res.json();
+        const data: Banner[] = await res.json();
         setBanners(data);
       } catch (error) {
         console.error('Failed to fetch banners:', error);
@@ -62,9 +72,10 @@ export default function Banner() {
 
   if (banners.length === 0) {
     return (
-      <div className="text-center p-6 text-gray-500" role="status" aria-live="polite">
-        Loading banners...
-      </div>
+      // <div className="text-center p-6 text-gray-500" role="status" aria-live="polite">
+      //   Loading banners...
+      // </div>
+      ''
     );
   }
 

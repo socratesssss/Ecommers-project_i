@@ -1,3 +1,4 @@
+// src/app/checkout/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -5,13 +6,25 @@ import { useDispatch } from "react-redux";
 import { clearCart } from "@/redux/cartSlice";
 import Image from "next/image";
 import AddressForm from "@/app/components/Delibary";
-import { saveAs } from "file-saver";
 import Link from "next/link";
 import type { CartItem } from "../../redux/cartSlice";
 
 const DELIVERY_COST = 60;
 
+// --- Define the type for products fetched from your API ---
+// Adjust these properties based on what your API actually returns for a product
+type ApiFetchedProduct = {
+  _id: string;
+  price: number;
+  discountPrice?: number; // Assuming discountPrice is optional
+  inStock?: boolean; // Assuming inStock is optional and defaults to true if not present
+  // Add any other properties your API returns that might be relevant
+  // e.g., name: string; images: string[]; etc.
+};
+// ---------------------------------------------------------
+
 const OrderPage = () => {
+    const port = 'http://localhost:4000'
   const dispatch = useDispatch();
 
   const [checkoutItems, setCheckoutItems] = useState<CartItem[]>([]);
@@ -41,20 +54,24 @@ const OrderPage = () => {
   const handleConfirm = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/products");
-      const latestProducts = await res.json();
+      const res = await fetch(`${port}/api/product`);
+      if (!res.ok) throw new Error("Failed to fetch products");
+
+      // --- Use the new type here ---
+      const data: { products: ApiFetchedProduct[] } = await res.json();
+      const latestProducts: ApiFetchedProduct[] = data.products;
+      // -----------------------------
 
       const validatedItems = checkoutItems.map((item) => {
-        const match = latestProducts.find(
-          (p: any) => p.id === parseInt(item._id)
-        );
+        // --- Use the new type for 'p' here ---
+        const match = latestProducts.find((p: ApiFetchedProduct) => p._id === item._id);
+        // ------------------------------------
         return {
           id: item._id,
           name: item.productName.original,
           image: item.imageUrl,
           quantity: item.quantity,
-          pricePerUnit:
-            match?.discountPrice || match?.price || item.price.amount,
+          pricePerUnit: match?.discountPrice || match?.price || item.price.amount,
           inStock: match?.inStock ?? true,
         };
       });
@@ -87,52 +104,26 @@ const OrderPage = () => {
         orderDate: new Date().toISOString(),
       };
 
-      const blob = new Blob([JSON.stringify(orderData, null, 2)], {
-        type: "application/json",
+      const response = await fetch(`${port}/api/order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
       });
-      saveAs(blob, `order-${Date.now()}.json`);
 
-      const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-      localStorage.setItem(
-        "orders",
-        JSON.stringify([...existingOrders, orderData])
-      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`❌ Failed to submit order: ${errorText}`);
+      }
 
       dispatch(clearCart());
+      localStorage.removeItem("checkoutItems");
+
       setShowSuccess(true);
     } catch (err) {
-      alert(
-        "⚠️ Failed to validate product data. Placing order with current cart items."
-      );
-
-      const subtotal = checkoutItems.reduce(
-        (acc, item) => acc + item.price.amount * item.quantity,
-        0
-      );
-
-      const orderData = {
-        products: checkoutItems.map((item) => ({
-          id: item._id,
-          name: item.productName.original,
-          image: item.imageUrl,
-          quantity: item.quantity,
-          pricePerUnit: item.price.amount,
-          total: item.price.amount * item.quantity,
-        })),
-        address: addressForm,
-        deliveryCost: DELIVERY_COST,
-        subtotal,
-        total: subtotal + DELIVERY_COST,
-        paymentMethod,
-        orderDate: new Date().toISOString(),
-      };
-
-      const blob = new Blob([JSON.stringify(orderData, null, 2)], {
-        type: "application/json",
-      });
-      saveAs(blob, `order-${Date.now()}.json`);
-      dispatch(clearCart());
-      setShowSuccess(true);
+      alert("⚠️ Something went wrong. Please try again.");
+      console.error("Order POST failed:", err);
     } finally {
       setLoading(false);
     }
@@ -199,7 +190,7 @@ const OrderPage = () => {
       </div>
 
       {/* Payment Method */}
-      <section className="md:mt-10 mt-5  p-4 rounded-md shadow-sm bg-white">
+      <section className="md:mt-10 mt-5 p-4 rounded-md shadow-sm bg-white">
         <h2 className="text-xl font-bold mb-4 text-center"> Payment Method</h2>
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-sm md:text-base">

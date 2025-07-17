@@ -9,6 +9,7 @@ import Link from "next/link";
 import axios from "axios";
 
 const CartModel = () => {
+    const port = 'http://localhost:4000'
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(true);
@@ -42,7 +43,7 @@ useEffect(() => {
     await Promise.all(
       cartItems.map(async (item) => {
         try {
-          const res = await axios.get(`http://localhost:4000/api/product/${item._id}`);
+          const res = await axios.get(`${port}/api/product/${item._id}`);
           statusMap[item._id] = {
             exists: true,
             inStock: res.data.inStock,
@@ -52,6 +53,7 @@ useEffect(() => {
             exists: false,
             inStock: false,
           };
+          return err
         }
       })
     );

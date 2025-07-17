@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Minus, Plus } from "lucide-react";
 import AddressForm from "@/app/components/Delibary";
-import { saveAs } from "file-saver";
+
 import Link from "next/link";
 
 // Types
@@ -85,29 +85,40 @@ const OrderNowPage = () => {
     fetchOrderProduct();
   }, []);
 
-  const handleConfirm = () => {
-    if (!product) return;
+const handleConfirm = async () => {
+  if (!product) return;
 
-    const fullOrder = {
-      product: {
-        id: product._id,
-        name: product.productName.original,
-        image: product.imageUrl,
-        price: product.price.amount,
-        quantity,
-        total: quantity * product.price.amount,
+  const fullOrder = {
+    product: {
+      id: product._id,
+      name: product.productName.original,
+      image: product.imageUrl,
+      price: product.price.amount,
+      quantity,
+      total: quantity * product.price.amount,
+    },
+    deliveryDetails: form,
+    paymentMethod,
+    deliveryCost,
+    total: quantity * product.price.amount + deliveryCost,
+    orderDate: new Date().toISOString(),
+  };
+
+  try {
+    const res = await fetch("http://localhost:4000/api/order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-      deliveryDetails: form,
-      paymentMethod,
-      deliveryCost,
-      total: quantity * product.price.amount + deliveryCost,
-      orderDate: new Date().toISOString(),
-    };
-
-    const blob = new Blob([JSON.stringify(fullOrder, null, 2)], {
-      type: "application/json",
+      body: JSON.stringify(fullOrder),
     });
-    saveAs(blob, `order-now-${Date.now()}.json`);
+
+    if (!res.ok) {
+      throw new Error("Failed to place order");
+    }
+
+    const result = await res.json();
+    console.log("Order placed:", result);
 
     // ✅ Clear localStorage BEFORE clearing form
     localStorage.removeItem("deliveryForm");
@@ -128,7 +139,12 @@ const OrderNowPage = () => {
       district: "",
       road: "",
     });
-  };
+  } catch (error) {
+    console.error("Order submit error:", error);
+    alert("❌ Failed to submit order. Please try again.");
+  }
+};
+
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
   const decreaseQuantity = () =>

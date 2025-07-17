@@ -3,6 +3,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+
+// Define the type for the product as it comes from your API
+type ApiProduct = {
+  _id: string; // Assuming _id is a string from MongoDB
+  name: string;
+  images?: string[]; // images might be an array of strings, and it's optional
+  // Add any other properties your API returns that you might use
+  // e.g., price: number; description: string;
+};
 
 type Product = {
   id: string;
@@ -11,10 +21,13 @@ type Product = {
 };
 
 type SearchBoxProps = {
+  onSearchComplete?: () => void;
+  onSearch?: (query: string) => void;
   className?: string;
 };
 
 const SearchBox: React.FC<SearchBoxProps> = ({ className = "" }) => {
+    const port = 'http://localhost:4000'
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Product[]>([]);
@@ -30,11 +43,12 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = "" }) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/product?q=${query.trim()}&limit=5`);
+        const res = await fetch(`${port}/api/product?q=${query.trim()}&limit=5`);
         const data = await res.json();
         setSuggestions(
-          (data.products || []).map((p: any) => ({
-            id: String(p._id),
+          // Cast data.products to an array of ApiProduct
+          (data.products || [] as ApiProduct[]).map((p: ApiProduct) => ({
+            id: String(p._id), // Ensure _id is converted to string for the Product type
             name: p.name,
             image: p.images?.[0] || "/placeholder.png",
           }))
@@ -69,7 +83,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = "" }) => {
   };
 
   return (
-    <div className={`relative w-full max-w-[220px] ${className}`} ref={containerRef}>
+    <div className={`relative w-full max-w-[260px] ${className}`} ref={containerRef}>
       <form onSubmit={handleSubmit} className="flex items-center border rounded-md">
         <input
           type="text"
@@ -94,7 +108,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = "" }) => {
                 setSuggestions([]);
               }}
             >
-              <img src={item.image} alt={item.name} className="w-8 h-8 rounded object-cover" />
+              <Image src={item.image} alt={item.name} width={40} height={35} className=" rounded object-cover" />
               <span>{item.name}</span>
             </li>
           ))}

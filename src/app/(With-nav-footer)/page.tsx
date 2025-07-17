@@ -12,7 +12,7 @@ type ProductColor = {
 };
 
 type Product = {
-  _id: number | string;
+  _id: string;
   name: string;
   price: number;
   discountPrice?: number;
@@ -32,6 +32,7 @@ type Filters = {
 };
 
 const HomePage = () => {
+    const port = 'http://localhost:4000'
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
@@ -39,7 +40,7 @@ const HomePage = () => {
   const itemsPerPage = 10;
 
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchTerm = '';
   const [filters, setFilters] = useState<Filters>({
     categories: [],
     minPrice: 0,
@@ -74,7 +75,7 @@ const HomePage = () => {
       }
 
       try {
-        const res = await fetch(`http://localhost:4000/api/product?${query.toString()}`);
+        const res = await fetch(`${port}/api/product?${query.toString()}`);
         const data = await res.json();
 
         setProducts(data.products || []);

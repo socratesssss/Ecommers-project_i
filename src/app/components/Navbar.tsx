@@ -70,7 +70,7 @@ export default function Navbar() {
                   animate={{ scale: 1 }}
                   exit={{ scale: 0 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  className="absolute -top-3 -right-3 w-5 h-5 bg-[#F35C7A] rounded-full text-white text-[11px] flex items-center justify-center font-medium"
+                  className="absolute -top-2 -right-2 w-4 h-4 bg-[#F35C7A] rounded-full text-white text-[11px] flex items-center justify-center font-medium"
                 >
                   {totalQuantity}
                 </motion.div>

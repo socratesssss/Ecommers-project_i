@@ -1,6 +1,4 @@
 'use client';
-
-import Head from 'next/head';
 import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
@@ -27,7 +25,8 @@ type Product = {
 };
 
 const ProductPage = () => {
-  const SERVER_URL = 'http://localhost:4000';
+    const port = 'http://localhost:4000'
+
   const dispatch = useDispatch();
   const router = useRouter();
   const params = useParams();
@@ -45,7 +44,7 @@ const ProductPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`${SERVER_URL}/api/product/${productId}`);
+        const res = await fetch(`${port}/api/product/${productId}`);
         if (!res.ok) {
           const text = await res.text();
           throw new Error(`Fetch error: ${res.status} - ${text}`);
@@ -73,13 +72,13 @@ const ProductPage = () => {
     if (!product) return [];
     if (selectedColor?.images?.length)
       return selectedColor.images.map(img =>
-        img.startsWith('http') ? img : `${SERVER_URL}/uploads/${img}`
+        img.startsWith('http') ? img : `${port}}/uploads/${img}`
       );
 
     const base = product.images || [];
     const colors = product.productColors?.flatMap(c => c.images) || [];
     return [...base, ...colors].map(img =>
-      img.startsWith('http') ? img : `${SERVER_URL}/uploads/${img}`
+      img.startsWith('http') ? img : `${port}/uploads/${img}`
     );
   };
 

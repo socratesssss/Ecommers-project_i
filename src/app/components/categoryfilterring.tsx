@@ -63,6 +63,8 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
     }
   };
 
+  
+
   // Optional: Restrict input to positive numbers for price fields
   const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
