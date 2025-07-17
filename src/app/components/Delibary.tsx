@@ -1,64 +1,71 @@
 'use client';
 import Locations from '../../data/AddressData'; 
+import { DeliveryDetails } from '../order-now/page';
 
-type UAEKeys = keyof typeof Locations.Bangladesh;
-type CityKeys<T extends UAEKeys> = keyof (typeof Locations.Bangladesh)[T];
-type DistrictKeys<T extends UAEKeys, C extends CityKeys<T>> = keyof (typeof Locations.Bangladesh)[T][C];
+type DivisionKeys = keyof typeof Locations.Bangladesh;
+type CityKeys<T extends DivisionKeys> = keyof (typeof Locations.Bangladesh)[T];
+type AreaKeys<T extends DivisionKeys, C extends CityKeys<T>> = keyof (typeof Locations.Bangladesh)[T][C];
 
-type DeliveryForm = {
-  name: string;
-  phone: string;
-  email: string;
-  country: string;
-  emirate: string;
-  city: string;
-  district: string;
-  road: string;
-};
+// type DeliveryForm = {
+//   name: string;
+//   phone: string;
+//   email: string;
+//   country: string;
+//   division: string;
+//   city: string;
+//   area: string;
+//   road: string;
+// };
 
 type Props = {
-  form: DeliveryForm;
-  setForm: React.Dispatch<React.SetStateAction<DeliveryForm>>;
+  form: DeliveryDetails;
+  setForm: React.Dispatch<React.SetStateAction<DeliveryDetails>>;
 };
 
 const AddressForm: React.FC<Props> = ({ form, setForm }) => {
-  const handleChange = (field: keyof DeliveryForm, value: string) => {
+  const handleChange = (field: keyof DeliveryDetails, value: string) => {
     setForm((prev) => {
       const updated = { ...prev, [field]: value };
-      if (field === "emirate") {
-        updated.city = "";
-        updated.district = "";
-        updated.road = "";
-      } else if (field === "city") {
-        updated.district = "";
-        updated.road = "";
-      } else if (field === "district") {
-        updated.road = "";
+      if (field === 'division') {
+        updated.city = '';
+        updated.area = '';
+        updated.road = '';
+      } else if (field === 'city') {
+        updated.area = '';
+        updated.road = '';
+      } else if (field === 'area') {
+        updated.road = '';
       }
       return updated;
     });
   };
 
-  const emirates = Object.keys(Locations.Bangladesh) as UAEKeys[];
-
-  const emirateKey = form.emirate as UAEKeys;
-  const cities = emirates.includes(emirateKey)
-    ? (Object.keys(Locations.Bangladesh[emirateKey]) as CityKeys<typeof emirateKey>[])
+  const divisions = Object.keys(Locations.Bangladesh) as DivisionKeys[];
+  const divisionKey = form.division as DivisionKeys;
+  const cities = divisions.includes(divisionKey)
+    ? (Object.keys(Locations.Bangladesh[divisionKey]) as CityKeys<typeof divisionKey>[])
     : [];
 
-  const cityKey = form.city as CityKeys<typeof emirateKey>;
-  const districts =
-    emirates.includes(emirateKey) && cityKey in Locations.Bangladesh[emirateKey]
-      ? (Object.keys(Locations.Bangladesh[emirateKey][cityKey]) as DistrictKeys<typeof emirateKey, typeof cityKey>[])
+  const cityKey = form.city as CityKeys<typeof divisionKey>;
+  const areas =
+    divisions.includes(divisionKey) && cityKey in Locations.Bangladesh[divisionKey]
+      ? (Object.keys(Locations.Bangladesh[divisionKey][cityKey]) as AreaKeys<typeof divisionKey, typeof cityKey>[])
       : [];
 
-  const districtKey = form.district as DistrictKeys<typeof emirateKey, typeof cityKey>;
+  const areaKey = form.area as AreaKeys<typeof divisionKey, typeof cityKey>;
   const roads =
-    emirates.includes(emirateKey) &&
-    cityKey in Locations.Bangladesh[emirateKey] &&
-    districtKey in Locations.Bangladesh[emirateKey][cityKey]
-      ? Locations.Bangladesh[emirateKey][cityKey][districtKey]
+    divisions.includes(divisionKey) &&
+    cityKey in Locations.Bangladesh[divisionKey] &&
+    areaKey in Locations.Bangladesh[divisionKey][cityKey]
+      ? Locations.Bangladesh[divisionKey][cityKey][areaKey].roads
       : [];
+
+  const deliveryCost =
+    divisions.includes(divisionKey) &&
+    cityKey in Locations.Bangladesh[divisionKey] &&
+    areaKey in Locations.Bangladesh[divisionKey][cityKey]
+      ? Locations.Bangladesh[divisionKey][cityKey][areaKey].deliveryCost
+      : null;
 
   return (
     <div className="max-w-3xl p-6 bg-white rounded shadow space-y-6">
@@ -69,43 +76,43 @@ const AddressForm: React.FC<Props> = ({ form, setForm }) => {
           type="text"
           placeholder="Full Name"
           value={form.name}
-          onChange={(e) => handleChange("name", e.target.value)}
+          onChange={(e) => handleChange('name', e.target.value)}
           className="p-2 border rounded w-full"
         />
         <input
           type="tel"
           placeholder="Phone Number"
           value={form.phone}
-          onChange={(e) => handleChange("phone", e.target.value)}
+          onChange={(e) => handleChange('phone', e.target.value)}
           className="p-2 border rounded w-full"
         />
         <input
           type="email"
           placeholder="Email"
           value={form.email}
-          onChange={(e) => handleChange("email", e.target.value)}
-          className="p-2 border rounded w-full "
+          onChange={(e) => handleChange('email', e.target.value)}
+          className="p-2 border rounded w-full"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <select
           className="p-2 border rounded w-full bg-gray-100 text-gray-500 cursor-not-allowed"
-          value="UAE"
+          value="Bangladesh"
           disabled
         >
-          <option value="UAE">Bangladesh</option>
+          <option value="Bangladesh">Bangladesh</option>
         </select>
 
         <select
           className="p-2 border rounded w-full"
-          value={form.emirate}
-          onChange={(e) => handleChange("emirate", e.target.value)}
+          value={form.division}
+          onChange={(e) => handleChange('division', e.target.value)}
         >
-          <option value="">Select District</option>
-          {emirates.map((e) => (
-            <option key={e} value={e}>
-              {e}
+          <option value="">Select Division</option>
+          {divisions.map((d) => (
+            <option key={d} value={d}>
+              {d}
             </option>
           ))}
         </select>
@@ -113,10 +120,10 @@ const AddressForm: React.FC<Props> = ({ form, setForm }) => {
         <select
           className="p-2 border rounded w-full"
           value={form.city}
-          onChange={(e) => handleChange("city", e.target.value)}
-          disabled={!form.emirate}
+          onChange={(e) => handleChange('city', e.target.value)}
+          disabled={!form.division}
         >
-          <option value="">Select Sub-District</option>
+          <option value="">Select City</option>
           {cities.map((c) => (
             <option key={c} value={c}>
               {c}
@@ -126,14 +133,14 @@ const AddressForm: React.FC<Props> = ({ form, setForm }) => {
 
         <select
           className="p-2 border rounded w-full"
-          value={form.district}
-          onChange={(e) => handleChange("district", e.target.value)}
+          value={form.area}
+          onChange={(e) => handleChange('area', e.target.value)}
           disabled={!form.city}
         >
-          <option value="">Select city</option>
-          {districts.map((d) => (
-            <option key={String(d)} value={String(d)}>
-              {String(d)}
+          <option value="">Select Area</option>
+          {areas.map((a) => (
+            <option key={String(a)} value={String(a)}>
+              {String(a)}
             </option>
           ))}
         </select>
@@ -141,8 +148,8 @@ const AddressForm: React.FC<Props> = ({ form, setForm }) => {
         <select
           className="p-2 border rounded w-full sm:col-span-2"
           value={form.road}
-          onChange={(e) => handleChange("road", e.target.value)}
-          disabled={!form.district}
+          onChange={(e) => handleChange('road', e.target.value)}
+          disabled={!form.area}
         >
           <option value="">Select Road</option>
           {roads.map((r) => (
@@ -151,6 +158,12 @@ const AddressForm: React.FC<Props> = ({ form, setForm }) => {
             </option>
           ))}
         </select>
+
+        {deliveryCost !== null && (
+          <div className="col-span-2 text-right text-sm text-gray-700">
+            Delivery Cost: ৳{deliveryCost}
+          </div>
+        )}
       </div>
     </div>
   );

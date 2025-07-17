@@ -1,4 +1,3 @@
-
 interface LocationData {
   [country: string]: {
     [emirate: string]: {
@@ -29,4 +28,4 @@ const Locations: LocationData = {
   },
 } as const;
 
-export default Locations
+export default Locations;

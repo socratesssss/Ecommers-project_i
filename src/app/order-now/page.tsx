@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Minus, Plus } from "lucide-react";
 import AddressForm from "@/app/components/Delibary";
-
+import Locations from "../../data/AddressData";
 import Link from "next/link";
 
 // Types
@@ -17,16 +17,18 @@ export type OrderProduct = {
   availability: { status: string };
 };
 
-export type DeliveryDetails = {
+export interface DeliveryDetails {
   name: string;
   phone: string;
   email: string;
   country: string;
-  emirate: string;
+  division: string;
   city: string;
-  district: string;
+  area: string;
   road: string;
-};
+  deliveryCost: number;
+}
+
 
 const OrderNowPage = () => {
   const [product, setProduct] = useState<OrderProduct | null>(null);
@@ -34,22 +36,26 @@ const OrderNowPage = () => {
   const [deliveryCost, setDeliveryCost] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "bkash">("cod");
   const [showSuccess, setShowSuccess] = useState(false);
+const [form, setForm] = useState<DeliveryDetails>({
+  name: "",
+  phone: "",
+  email: "",
+  country: "Bangladesh",
+  division: "",
+  city: "",
+  area: "",
+  road: "",
+  deliveryCost: 0,
+});
 
-  const [form, setForm] = useState<DeliveryDetails>(() => {
+
+  useEffect(() => {
     const saved = localStorage.getItem("deliveryForm");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          name: "",
-          phone: "",
-          email: "",
-          country: "UAE",
-          emirate: "",
-          city: "",
-          district: "",
-          road: "",
-        };
-  });
+    if (saved) {
+      setForm(JSON.parse(saved));
+    }
+  }, []);
+
   useEffect(() => {
     localStorage.setItem("deliveryForm", JSON.stringify(form));
   }, [form]);
@@ -78,77 +84,87 @@ const OrderNowPage = () => {
         }
 
         setQuantity(parsed.quantity || 1);
-        setDeliveryCost(15);
       }
     };
 
     fetchOrderProduct();
   }, []);
 
-const handleConfirm = async () => {
-  if (!product) return;
+  // Update delivery cost based on local Locations data
+useEffect(() => {
+  const { country, division, city, area } = form;
+  if (country && division && city && area) {
+    const cost =
+      Locations?.[country]?.[division]?.[city]?.[area]?.deliveryCost;
+    if (cost !== undefined) {
+      setDeliveryCost(cost);
+      setForm((prev) => ({ ...prev, deliveryCost: cost }));
+    }
+  }
+}, [form.country, form.division, form.city, form.area]);
 
-  const fullOrder = {
-    product: {
-      id: product._id,
-      name: product.productName.original,
-      image: product.imageUrl,
-      price: product.price.amount,
-      quantity,
-      total: quantity * product.price.amount,
-    },
-    deliveryDetails: form,
-    paymentMethod,
-    deliveryCost,
-    total: quantity * product.price.amount + deliveryCost,
-    orderDate: new Date().toISOString(),
+
+  const handleConfirm = async () => {
+    if (!product) return;
+
+    const fullOrder = {
+      product: {
+        id: product._id,
+        name: product.productName.original,
+        image: product.imageUrl,
+        price: product.price.amount,
+        quantity,
+        total: quantity * product.price.amount,
+      },
+      deliveryDetails: form,
+      paymentMethod,
+      deliveryCost,
+      total: quantity * product.price.amount + deliveryCost,
+      orderDate: new Date().toISOString(),
+    };
+
+    try {
+      const res = await fetch("http://localhost:4000/api/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fullOrder),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to place order");
+      }
+
+      const result = await res.json();
+      console.log("Order placed:", result);
+
+      localStorage.removeItem("deliveryForm");
+      localStorage.removeItem("orderNowProduct");
+
+      setShowSuccess(true);
+      setQuantity(1);
+      setPaymentMethod("cod");
+
+      setForm({
+        name: "",
+  phone: "",
+  email: "",
+  country: "Bangladesh",
+  division: "",
+  city: "",
+  area: "",
+  road: "",
+  deliveryCost: 0,
+      });
+    } catch (error) {
+      console.error("Order submit error:", error);
+      alert("❌ Failed to submit order. Please try again.");
+    }
   };
 
-  try {
-    const res = await fetch("http://localhost:4000/api/order", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(fullOrder),
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to place order");
-    }
-
-    const result = await res.json();
-    console.log("Order placed:", result);
-
-    // ✅ Clear localStorage BEFORE clearing form
-    localStorage.removeItem("deliveryForm");
-    localStorage.removeItem("orderNowProduct");
-
-    // Reset state
-    setShowSuccess(true);
-    setQuantity(1);
-    setPaymentMethod("cod");
-
-    setForm({
-      name: "",
-      phone: "",
-      email: "",
-      country: "UAE",
-      emirate: "",
-      city: "",
-      district: "",
-      road: "",
-    });
-  } catch (error) {
-    console.error("Order submit error:", error);
-    alert("❌ Failed to submit order. Please try again.");
-  }
-};
-
-
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
-  const decreaseQuantity = () =>
-    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   if (!product) return <p className="p-8 text-center">No product selected.</p>;
 
@@ -170,7 +186,7 @@ const handleConfirm = async () => {
               {product.productName.original}
             </h3>
             <p className="text-gray-500 text-sm mt-1">
-              Availability:{" "}
+              Availability: {" "}
               <span
                 className={
                   product.availability.status === "In Stock"
@@ -202,7 +218,7 @@ const handleConfirm = async () => {
             </div>
 
             <p className="mt-4 text-md">
-              Delivery Cost:{" "}
+              Delivery Cost: {" "}
               <span className="font-semibold text-blue-600">
                 ${deliveryCost.toFixed(2)}
               </span>
@@ -215,7 +231,7 @@ const handleConfirm = async () => {
         </section>
 
         <div className="space-y-6">
-          <AddressForm form={form} setForm={setForm} />
+          <AddressForm form={form} setForm={setForm}  />
 
           <section className="md:mt-10 mt-5 p-4 rounded-md shadow-sm bg-white">
             <h2 className="text-xl font-bold mb-4 text-center">
