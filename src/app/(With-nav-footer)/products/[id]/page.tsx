@@ -71,9 +71,13 @@ const ProductPage = () => {
   const getDisplayImages = () => {
     if (!product) return [];
     if (selectedColor?.images?.length)
+      // return selectedColor.images.map(img =>
+      //   img.startsWith('http') ? img : `${port}}/uploads/${img}`
       return selectedColor.images.map(img =>
-        img.startsWith('http') ? img : `${port}}/uploads/${img}`
-      );
+  img.startsWith('http') ? img : `${port}/uploads/${img}`
+);
+
+   
 
     const base = product.images || [];
     const colors = product.productColors?.flatMap(c => c.images) || [];
@@ -106,19 +110,23 @@ const ProductPage = () => {
     setTimeout(() => setAnimate(false), 1000);
   };
 
-  const handleOrderNow = () => {
-    if (!product) return;
-    const orderProduct = {
-      _id: String(product.id),
-      productName: { original: product.name },
-      price: { amount: product.discountPrice || product.price },
-      quantity: 1,
-      imageUrl: selectedColor?.images?.[0] || product.images?.[0] || '/placeholder.jpg',
-      availability: { status: product.inStock ? 'In Stock' : 'Out of Stock' },
-    };
-    localStorage.setItem('orderNowProduct', JSON.stringify(orderProduct));
-    router.push('/order-now');
+const handleOrderNow = () => {
+  if (!product) return;
+
+  const orderProduct = {
+    _id: String(product.id),
+    productName: { original: product.name },
+    price: { amount: product.discountPrice || product.price },
+    quantity: 1,
+    imageUrl: selectedColor?.images?.[0] || product.images?.[0] || '/placeholder.jpg',
+    availability: { status: product.inStock ? 'In Stock' : 'Out of Stock' },
+    productColors: product.productColors || [], // ✅ Send all colors
   };
+
+  localStorage.setItem('orderNowProduct', JSON.stringify(orderProduct));
+  router.push('/order-now');
+};
+
 
   const handleMobileScroll = () => {
     if (!scrollContainerRef.current) return;

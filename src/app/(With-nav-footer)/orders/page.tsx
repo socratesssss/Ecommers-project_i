@@ -17,6 +17,7 @@ type Order = {
   total: number;
 };
 
+
 const OrdersPage = () => {
     
   const [orders, setOrders] = useState<Order[]>([]);
@@ -38,7 +39,7 @@ const OrdersPage = () => {
   if (orders.length === 0) {
     return <p className="text-center py-10">No orders found.</p>;
   }
-
+console.log(orders)
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-8">
       <h1 className="text-2xl font-bold mb-4 text-center">My Orders</h1>

@@ -5,16 +5,21 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { Minus, Plus } from "lucide-react";
 import Image from "next/image";
-import { adjustQuantity, removeFromCart, CartItem } from "@/redux/cartSlice";
-import Link from "next/link";
+import {
+  adjustQuantity,
+  removeFromCart,
+  CartItem,
+} from "@/redux/cartSlice";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 
 const CartPage = () => {
-  const port = 'http://localhost:4000'
+  const port = "http://localhost:4000";
   const cartItems = useSelector(
     (state: RootState) => state.cart.items as CartItem[]
   );
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const [productStatusMap, setProductStatusMap] = useState<
     Record<string, { exists: boolean; inStock: boolean }>
@@ -29,20 +34,31 @@ const CartPage = () => {
     dispatch(adjustQuantity({ _id, quantity: type === "inc" ? 1 : -1 }));
   };
 
-  // Fetch live product status
+  // ✅ Filter and proceed to checkout
+  const handleCheckout = () => {
+    const availableItems = cartItems.filter((item) => {
+      const status = productStatusMap[item._id];
+      return status?.exists && status?.inStock;
+    });
+
+    if (availableItems.length === 0) {
+      alert("❌ No available items to checkout.");
+      return;
+    }
+
+    localStorage.setItem("checkoutItems", JSON.stringify(availableItems));
+    router.push("/checkout");
+  };
+
+  // ✅ Fetch live product status
   useEffect(() => {
     const fetchProductStatus = async () => {
-      const statusMap: Record<
-        string,
-        { exists: boolean; inStock: boolean }
-      > = {};
+      const statusMap: Record<string, { exists: boolean; inStock: boolean }> = {};
 
       await Promise.all(
         cartItems.map(async (item) => {
           try {
-            const res = await axios.get(
-              `${port}/api/product/${item._id}`
-            );
+            const res = await axios.get(`${port}/api/product/${item._id}`);
             statusMap[item._id] = {
               exists: true,
               inStock: res.data.inStock,
@@ -52,7 +68,6 @@ const CartPage = () => {
               exists: false,
               inStock: false,
             };
-            return err
           }
         })
       );
@@ -63,12 +78,25 @@ const CartPage = () => {
     if (cartItems.length > 0) fetchProductStatus();
   }, [cartItems]);
 
+  const sortedCartItems = [...cartItems].sort((a, b) => {
+    const statusA = productStatusMap[a._id];
+    const statusB = productStatusMap[b._id];
+
+    const getRank = (status?: { inStock: boolean; exists: boolean }) => {
+      if (!status) return 2;
+      if (!status.exists || !status.inStock) return 1;
+      return 0;
+    };
+
+    return getRank(statusA) - getRank(statusB);
+  });
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-2xl font-bold mb-6 text-center">Your Cart</h1>
 
       <div className="flex flex-col gap-4 overflow-y-auto pr-2">
-        {cartItems.map((item) => {
+        {sortedCartItems.map((item) => {
           const status = productStatusMap[item._id];
 
           return (
@@ -90,7 +118,7 @@ const CartPage = () => {
                       {item.productName.original}
                     </h3>
 
-                    {/* Availability status */}
+                    {/* ✅ Availability status */}
                     {status && (
                       <span
                         className={`text-[12px] mt-1 inline-block ${
@@ -121,7 +149,9 @@ const CartPage = () => {
                       onClick={() => handleQtyChange(item._id, "dec")}
                       className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center"
                       disabled={
-                        !status?.exists || !status?.inStock || item.quantity <= 1
+                        !status?.exists ||
+                        !status?.inStock ||
+                        item.quantity <= 1
                       }
                       aria-label="Decrease quantity"
                     >
@@ -163,7 +193,7 @@ const CartPage = () => {
           );
         })}
 
-        {/* Subtotal + Actions */}
+        {/* ✅ Subtotal & Actions */}
         <div className="flex items-center justify-between font-semibold text-base mb-2">
           <span>Subtotal</span>
           <span className="ml-12">${subtotal.toFixed(2)}</span>
@@ -172,16 +202,19 @@ const CartPage = () => {
         <p className="text-gray-500 text-sm mb-4">
           Shipping and taxes calculated at checkout.
         </p>
+
         <div className="flex flex-col md:flex-row justify-between gap-4 text-sm">
-          <button className="flex-1 hidden rounded-md py-3 px-4 ring-1 ring-gray-300 hover:bg-gray-50">
+          <button
+            className="flex-1 hidden rounded-md py-3 px-4 ring-1 ring-gray-300 hover:bg-gray-50"
+          >
             View Cart
           </button>
-          <Link
-            href="/checkout"
+          <button
+            onClick={handleCheckout}
             className="flex-1 rounded-md py-3 px-4 bg-black text-white hover:bg-gray-800 text-center"
           >
             Checkout
-          </Link>
+          </button>
         </div>
       </div>
     </div>
