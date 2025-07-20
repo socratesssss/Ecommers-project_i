@@ -187,15 +187,21 @@ useEffect(() => {
             </h3>
             <p className="text-gray-500 text-sm mt-1">
               Availability: {" "}
-              <span
-                className={
-                  product.availability.status === "In Stock"
-                    ? "text-green-600"
-                    : "text-red-500"
-                }
-              >
-                {product.availability.status}
-              </span>
+{product?.availability?.status ? (
+  <span
+    className={
+      product.availability.status === "In Stock"
+        ? "text-green-600"
+        : "text-red-500"
+    }
+  >
+    {product.availability.status}
+  </span>
+) : (
+  <span className="text-gray-500">Unknown</span>
+)}
+
+
             </p>
             <p className="text-orange-500 font-bold text-xl mt-2">
               ${product.price.amount.toFixed(2)}

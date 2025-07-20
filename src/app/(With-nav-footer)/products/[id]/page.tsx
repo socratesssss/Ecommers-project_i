@@ -12,7 +12,7 @@ type ProductColor = {
 };
 
 type Product = {
-  id:  string;
+  _id:  string;
   name: string;
   description?: string;
   miniDescription?: string;
@@ -71,13 +71,9 @@ const ProductPage = () => {
   const getDisplayImages = () => {
     if (!product) return [];
     if (selectedColor?.images?.length)
-      // return selectedColor.images.map(img =>
-      //   img.startsWith('http') ? img : `${port}}/uploads/${img}`
       return selectedColor.images.map(img =>
-  img.startsWith('http') ? img : `${port}/uploads/${img}`
-);
-
-   
+        img.startsWith('http') ? img : `${port}}/uploads/${img}`
+      );
 
     const base = product.images || [];
     const colors = product.productColors?.flatMap(c => c.images) || [];
@@ -94,33 +90,39 @@ const ProductPage = () => {
     }
   };
 
-  const handleAdd = () => {
-    if (!product) return;
-    dispatch(
-      addToCart({
-        _id: String(product.id),
-        productName: { original: product.name },
-        price: { amount: product.discountPrice || product.price },
-        quantity: 1,
-        imageUrl: selectedColor?.images?.[0] || product.images?.[0] || '/placeholder.jpg',
-        availability: { status: product.inStock ? 'In Stock' : 'Out of Stock' },
-      })
-    );
-    setAnimate(true);
-    setTimeout(() => setAnimate(false), 1000);
-  };
+
+const handleAdd = () => {
+  if (!product) return;
+
+dispatch(addToCart({
+  _id: product._id,   // <-- Correct product ID here
+  productName: { original: product.name },
+  price: { amount: product.discountPrice || product.price },
+  quantity: 1,
+  imageUrl: selectedColor?.images?.[0] || product.images?.[0] || '/placeholder.jpg',
+  inStock: product.inStock,
+  selectedColor: selectedColor?.color || null,
+  allColors: product.productColors || [],
+}));
+
+
+
+  setAnimate(true);
+  setTimeout(() => setAnimate(false), 1000);
+};
 
 const handleOrderNow = () => {
   if (!product) return;
 
   const orderProduct = {
-    _id: String(product.id),
+    _id: String(product._id),
     productName: { original: product.name },
     price: { amount: product.discountPrice || product.price },
     quantity: 1,
     imageUrl: selectedColor?.images?.[0] || product.images?.[0] || '/placeholder.jpg',
-    availability: { status: product.inStock ? 'In Stock' : 'Out of Stock' },
-    productColors: product.productColors || [], // ✅ Send all colors
+    inStock: product.inStock, // ✅ same here
+    selectedColor: selectedColor?.color || null,
+    allColors: product.productColors || [],
   };
 
   localStorage.setItem('orderNowProduct', JSON.stringify(orderProduct));

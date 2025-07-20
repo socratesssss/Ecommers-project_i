@@ -1,15 +1,23 @@
 // redux/cartSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+// 
+type ProductColor = {
+  color: string;
+  images: string[];
+};
 
-// Define Cart Item type
-export type CartItem = {
+export interface CartItem {
   _id: string;
   productName: { original: string };
   price: { amount: number };
   quantity: number;
   imageUrl: string;
-  availability?: { status: string }; // optional, if you want to keep it
-};
+  inStock: boolean; // ✅ changed from "availability"
+  selectedColor?: string | null;
+  allColors?: ProductColor[];
+}
+
+
 
 // Define Cart State
 interface CartState {
@@ -51,15 +59,23 @@ const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addToCart(state, action: PayloadAction<CartItem>) {
-      const existing = state.items.find(item => item._id === action.payload._id);
-      if (existing) {
-        existing.quantity += action.payload.quantity;
-      } else {
-        state.items.push(action.payload);
-      }
-      saveToStorage(state.items);
-    },
+addToCart(state, action: PayloadAction<CartItem>) {
+  const { _id, selectedColor } = action.payload;
+
+  // Match existing cart item by _id and selectedColor (if any)
+  const existing = state.items.find(
+    item => item._id === _id && item.selectedColor === selectedColor
+  );
+
+  if (existing) {
+    existing.quantity += action.payload.quantity;
+  } else {
+    state.items.push(action.payload);
+  }
+
+  saveToStorage(state.items);
+},
+
 
     removeFromCart(state, action: PayloadAction<string>) {
       state.items = state.items.filter(item => item._id !== action.payload);
