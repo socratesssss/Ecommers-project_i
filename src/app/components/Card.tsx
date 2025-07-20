@@ -34,7 +34,7 @@ export default function ProductCard({
       price: { amount: discountPrice || price },
       quantity: 1,
       imageUrl: images[0],
-      availability: { status: inStock ? 'In Stock' : 'Out of Stock' },
+      inStock: inStock,
     }));
 
     setAnimate(true);

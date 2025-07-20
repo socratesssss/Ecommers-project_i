@@ -8,6 +8,12 @@ import Locations from "../../data/AddressData";
 import Link from "next/link";
 
 // Types
+type ProductColor = {
+  color: string;
+  images: string[];
+  _id: string;
+};
+
 export type OrderProduct = {
   _id: string | number;
   productName: { original: string };
@@ -15,6 +21,7 @@ export type OrderProduct = {
   quantity: number;
   imageUrl: string;
   availability: { status: string };
+  allColors?: ProductColor[];
 };
 
 export interface DeliveryDetails {
@@ -29,25 +36,26 @@ export interface DeliveryDetails {
   deliveryCost: number;
 }
 
-
 const OrderNowPage = () => {
+  const port = "http://localhost:4000";
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<ProductColor | null>(null);
   const [product, setProduct] = useState<OrderProduct | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [deliveryCost, setDeliveryCost] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "bkash">("cod");
   const [showSuccess, setShowSuccess] = useState(false);
-const [form, setForm] = useState<DeliveryDetails>({
-  name: "",
-  phone: "",
-  email: "",
-  country: "Bangladesh",
-  division: "",
-  city: "",
-  area: "",
-  road: "",
-  deliveryCost: 0,
-});
-
+  const [form, setForm] = useState<DeliveryDetails>({
+    name: "",
+    phone: "",
+    email: "",
+    country: "Bangladesh",
+    division: "",
+    city: "",
+    area: "",
+    road: "",
+    deliveryCost: 0,
+  });
 
   useEffect(() => {
     const saved = localStorage.getItem("deliveryForm");
@@ -78,9 +86,10 @@ const [form, setForm] = useState<DeliveryDetails>({
               status: data.inStock ? "In Stock" : "Out of Stock",
             },
             imageUrl: parsed.imageUrl || data.images?.[0] || "/placeholder.jpg",
+            allColors: data.productColors || [],
           });
         } catch (error) {
-          setProduct(parsed); // fallback
+          setProduct(parsed);
         }
 
         setQuantity(parsed.quantity || 1);
@@ -90,19 +99,17 @@ const [form, setForm] = useState<DeliveryDetails>({
     fetchOrderProduct();
   }, []);
 
-  // Update delivery cost based on local Locations data
-useEffect(() => {
-  const { country, division, city, area } = form;
-  if (country && division && city && area) {
-    const cost =
-      Locations?.[country]?.[division]?.[city]?.[area]?.deliveryCost;
-    if (cost !== undefined) {
-      setDeliveryCost(cost);
-      setForm((prev) => ({ ...prev, deliveryCost: cost }));
+  useEffect(() => {
+    const { country, division, city, area } = form;
+    if (country && division && city && area) {
+      const cost =
+        Locations?.[country]?.[division]?.[city]?.[area]?.deliveryCost;
+      if (cost !== undefined) {
+        setDeliveryCost(cost);
+        setForm((prev) => ({ ...prev, deliveryCost: cost }));
+      }
     }
-  }
-}, [form.country, form.division, form.city, form.area]);
-
+  }, [form.country, form.division, form.city, form.area]);
 
   const handleConfirm = async () => {
     if (!product) return;
@@ -111,10 +118,14 @@ useEffect(() => {
       product: {
         id: product._id,
         name: product.productName.original,
-        image: product.imageUrl,
+        image: selectedImage || product.imageUrl,
+        selectedColor,
+        selectedImage,
         price: product.price.amount,
         quantity,
         total: quantity * product.price.amount,
+        // selectedColor: selectedColor?.color || null,
+        colorData: selectedColor || null,
       },
       deliveryDetails: form,
       paymentMethod,
@@ -124,20 +135,13 @@ useEffect(() => {
     };
 
     try {
-      const res = await fetch("http://localhost:4000/api/order", {
+      const res = await fetch(`${port}/api/order`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fullOrder),
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to place order");
-      }
-
-      const result = await res.json();
-      console.log("Order placed:", result);
+      if (!res.ok) throw new Error("Failed to place order");
 
       localStorage.removeItem("deliveryForm");
       localStorage.removeItem("orderNowProduct");
@@ -145,17 +149,16 @@ useEffect(() => {
       setShowSuccess(true);
       setQuantity(1);
       setPaymentMethod("cod");
-
       setForm({
         name: "",
-  phone: "",
-  email: "",
-  country: "Bangladesh",
-  division: "",
-  city: "",
-  area: "",
-  road: "",
-  deliveryCost: 0,
+        phone: "",
+        email: "",
+        country: "Bangladesh",
+        division: "",
+        city: "",
+        area: "",
+        road: "",
+        deliveryCost: 0,
       });
     } catch (error) {
       console.error("Order submit error:", error);
@@ -164,9 +167,12 @@ useEffect(() => {
   };
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
-  const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  const decreaseQuantity = () =>
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   if (!product) return <p className="p-8 text-center">No product selected.</p>;
+  console.log("Image:" + selectedImage);
+  console.log("color:" + selectedColor);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 pb-14 space-y-10">
@@ -174,7 +180,7 @@ useEffect(() => {
         <section className="px-6 rounded-md shadow bg-white space-y-4">
           <div className="w-full aspect-[4/3] relative rounded-md overflow-hidden">
             <Image
-              src={product.imageUrl}
+              src={selectedImage || product.imageUrl}
               alt="Product"
               fill
               className="object-cover rounded-md"
@@ -185,24 +191,7 @@ useEffect(() => {
             <h3 className="font-semibold text-lg">
               {product.productName.original}
             </h3>
-            <p className="text-gray-500 text-sm mt-1">
-              Availability: {" "}
-{product?.availability?.status ? (
-  <span
-    className={
-      product.availability.status === "In Stock"
-        ? "text-green-600"
-        : "text-red-500"
-    }
-  >
-    {product.availability.status}
-  </span>
-) : (
-  <span className="text-gray-500">Unknown</span>
-)}
 
-
-            </p>
             <p className="text-orange-500 font-bold text-xl mt-2">
               ${product.price.amount.toFixed(2)}
             </p>
@@ -223,8 +212,38 @@ useEffect(() => {
               </button>
             </div>
 
+            {product.allColors && product.allColors.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {product.allColors.flatMap((color, colorIndex) =>
+                  color.images.map((image, imageIndex) => (
+                    <button
+                      key={`${colorIndex}-${imageIndex}`}
+                      onClick={() => {
+                        setSelectedImage(image);
+                        setSelectedColor(color.color);
+                      }}
+                      className={`p border rounded ${
+                        selectedImage === image
+                          ? "ring-2 ring-gray-800"
+                          : "border-gray-300"
+                      }`}
+                      aria-label={`Select image for color ${color.color}`}
+                    >
+                      <Image
+                        src={image || "/placeholder.jpg"}
+                        alt={`Color image ${colorIndex + 1}-${imageIndex + 1}`}
+                        width={40}
+                        height={40}
+                        className="rounded object-cover"
+                      />
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+
             <p className="mt-4 text-md">
-              Delivery Cost: {" "}
+              Delivery Cost:{" "}
               <span className="font-semibold text-blue-600">
                 ${deliveryCost.toFixed(2)}
               </span>
@@ -237,7 +256,7 @@ useEffect(() => {
         </section>
 
         <div className="space-y-6">
-          <AddressForm form={form} setForm={setForm}  />
+          <AddressForm form={form} setForm={setForm} />
 
           <section className="md:mt-10 mt-5 p-4 rounded-md shadow-sm bg-white">
             <h2 className="text-xl font-bold mb-4 text-center">

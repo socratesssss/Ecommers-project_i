@@ -5,6 +5,7 @@ import ProductCard from "../components/Card";
 import Banner from "../components/Banner";
 import ProductFilter from "../components/categoryfilterring";
 import Pagination from "../components/Pagination";
+import CartDebugger from "../components/redux";
 
 type ProductColor = {
   color: string;
@@ -130,6 +131,7 @@ const HomePage = () => {
           )}
         </>
       )}
+      <CartDebugger/>
     </div>
   );
 };
