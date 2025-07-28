@@ -35,6 +35,8 @@ const ProductPage = () => {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
+
   const [animate, setAnimate] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedColor, setSelectedColor] = useState<ProductColor | null>(null);
@@ -94,22 +96,26 @@ const ProductPage = () => {
 const handleAdd = () => {
   if (!product) return;
 
-dispatch(addToCart({
-  _id: product._id,   // <-- Correct product ID here
-  productName: { original: product.name },
-  price: { amount: product.discountPrice || product.price },
-  quantity: 1,
-  imageUrl: selectedColor?.images?.[0] || product.images?.[0] || '/placeholder.jpg',
-  inStock: product.inStock,
-  selectedColor: selectedColor?.color || null,
-  allColors: product.productColors || [],
-}));
-
-
+  dispatch(addToCart({
+    _id: product._id,
+    productName: { original: product.name },
+    price: { amount: product.discountPrice || product.price },
+    quantity: 1,
+    imageUrl: selectedColor?.images?.[0] || product.images?.[0] || '/placeholder.jpg',
+    inStock: product.inStock,
+    selectedColor: selectedColor?.color || null,
+    allColors: product.productColors || [],
+  }));
 
   setAnimate(true);
-  setTimeout(() => setAnimate(false), 1000);
+  setShowPopup(true); // Show popup
+
+  setTimeout(() => {
+    setAnimate(false);
+    setShowPopup(false); // Hide popup after 2 seconds
+  }, 2000);
 };
+
 
 const handleOrderNow = () => {
   if (!product) return;
@@ -162,6 +168,12 @@ const handleOrderNow = () => {
   // JSX below remains same — render using displayImages array
   return (
     <div className="px-4 py-10 md:flex gap-16">
+      {showPopup && (
+  <div className="fixed top-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-500">
+    Added to cart!
+  </div>
+)}
+
       {/* Image gallery section here (use displayImages) */}
         <div className="lg:sticky md:w-1/2 h-max">
               {/* Mobile Image Gallery */}

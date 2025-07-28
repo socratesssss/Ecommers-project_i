@@ -17,11 +17,11 @@ const Locations: LocationData = {
       "Dhaka City": {
         Dhanmondi: {
           roads: ["Road 1", "Road 2", "Road 3"],
-          deliveryCost: 50,
+          deliveryCost: 100,
         },
         Gulshan: {
           roads: ["Gulshan 1", "Gulshan 2"],
-          deliveryCost: 60,
+          deliveryCost: 70,
         },
       },
     },

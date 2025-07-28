@@ -8,6 +8,17 @@ import { Minus, Plus, X } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
 
+// Define your CartItem type
+type CartItem = {
+  _id: string;
+  productName: { original: string };
+  imageUrl: string;
+  quantity: number;
+  price: { amount: number };
+  selectedColor?: string | null;
+  selectedImage?: string;
+};
+
 const CartModel = () => {
   const port = 'http://localhost:4000'; // Make sure your Express server is running on this port
   const cartItems = useSelector((state: RootState) => state.cart.items);
@@ -96,7 +107,7 @@ const CartModel = () => {
     0
   );
 
-  const renderCartItem = (item: any) => {
+  const renderCartItem = (item: CartItem) => {
     const status = productStatusMap[item._id]; // Ensure status is retrieved here
     const isAvailable = status && status.exists && status.inStock;
 

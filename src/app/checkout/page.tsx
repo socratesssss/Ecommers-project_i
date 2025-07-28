@@ -1,11 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { clearCart } from "@/redux/cartSlice";
 import Image from "next/image";
-import AddressForm from "@/app/components/Delibary";
+import AddressForm, { AddressFormHandle } from "@/app/components/Delibary";
 import Link from "next/link";
+import Locations from "../../data/AddressData";
+
+export interface DeliveryDetails {
+  name: string;
+  phone: string;
+  email: string;
+  division: string;
+  city: string;
+  area: string;
+  road: string;
+  country: string;
+  deliveryCost: number;
+}
 
 type ProductColor = {
   color: string;
@@ -31,30 +44,48 @@ type CartItem = {
   selectedImage?: string;
 };
 
-const DELIVERY_COST = 60;
-
 const OrderPage = () => {
   const port = "http://localhost:4000";
   const dispatch = useDispatch();
   const [checkoutItems, setCheckoutItems] = useState<CartItem[]>([]);
   const [productsDB, setProductsDB] = useState<ApiFetchedProduct[]>([]);
+  const addressFormRef = useRef<AddressFormHandle>(null);
 
-  const [addressForm, setAddressForm] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    country: "UAE",
-    emirate: "",
-    city: "",
-    district: "",
-    road: "",
+  const [addressForm, setAddressForm] = useState<DeliveryDetails>({
+    name: '',
+    phone: '',
+    email: '',
+    division: '',
+    city: '',
+    area: '',
+    road: '',
+    country: 'Bangladesh',
+    deliveryCost: 0
   });
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Fetch localStorage checkoutItems
+  // Calculate delivery cost when location fields change
+  useEffect(() => {
+    const calculateDeliveryCost = () => {
+      const { division, city, area } = addressForm;
+      if (division && city && area) {
+        const cost = Locations?.Bangladesh?.[division]?.[city]?.[area]?.deliveryCost;
+        if (cost !== undefined) {
+          setAddressForm(prev => ({
+            ...prev,
+            deliveryCost: cost
+          }));
+        }
+      }
+    };
+    
+    calculateDeliveryCost();
+  }, [addressForm.division, addressForm.city, addressForm.area]);
+
+  // Load checkoutItems from localStorage
   useEffect(() => {
     const stored = localStorage.getItem("checkoutItems");
     if (stored) {
@@ -62,7 +93,7 @@ const OrderPage = () => {
     }
   }, []);
 
-  // Fetch all products from DB
+  // Load product data from DB
   useEffect(() => {
     fetch(`${port}/api/product`)
       .then((res) => res.json())
@@ -83,10 +114,16 @@ const OrderPage = () => {
   const handleConfirm = async () => {
     setLoading(true);
     try {
+      const isValid = addressFormRef.current?.validateForm();
+      if (!isValid) {
+        setLoading(false);
+        return;
+      }
+
       const validatedItems = checkoutItems.map((item) => {
         const match = productsDB.find((p) => p._id === item._id);
         return {
-          id: item._id,
+          _id: item._id,
           name: item.productName.original,
           image: item.selectedImage || item.imageUrl,
           quantity: item.quantity,
@@ -107,7 +144,7 @@ const OrderPage = () => {
         (acc, item) => acc + item.pricePerUnit * item.quantity,
         0
       );
-      const total = subtotal + DELIVERY_COST;
+      const total = subtotal + addressForm.deliveryCost;
 
       const orderData = {
         products: validatedItems.map((item) => ({
@@ -115,7 +152,7 @@ const OrderPage = () => {
           total: item.pricePerUnit * item.quantity,
         })),
         address: addressForm,
-        deliveryCost: DELIVERY_COST,
+        deliveryCost: addressForm.deliveryCost,
         subtotal,
         total,
         paymentMethod,
@@ -124,9 +161,7 @@ const OrderPage = () => {
 
       const response = await fetch(`${port}/api/order`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
       });
 
@@ -134,6 +169,26 @@ const OrderPage = () => {
 
       dispatch(clearCart());
       localStorage.removeItem("checkoutItems");
+
+      const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+      localStorage.setItem(
+        "orders",
+        JSON.stringify([
+          ...existingOrders,
+          {
+            orderDate: orderData.orderDate,
+            products: orderData.products.map((p) => ({
+              name: p.name,
+              image: p.image,
+              quantity: p.quantity,
+              total: p.total,
+            })),
+            deliveryCost: orderData.deliveryCost,
+            total: orderData.total,
+          },
+        ])
+      );
+
       setShowSuccess(true);
     } catch (err) {
       alert("⚠️ Something went wrong.");
@@ -147,7 +202,7 @@ const OrderPage = () => {
     (acc, item) => acc + item.price.amount * item.quantity,
     0
   );
-  const grandTotal = subtotal + DELIVERY_COST;
+  const grandTotal = subtotal + addressForm.deliveryCost;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -187,26 +242,30 @@ const OrderPage = () => {
 
                     {/* Color Selection */}
                     {product?.productColors && (
-                      <div className="flex gap-1 mt-2">
-                        {product.productColors.map((colorOption) => (
-                          <div key={colorOption.color} className="text-center">
-                            <Image
-                              src={colorOption.images[0]}
-                              alt={colorOption.color}
-                              width={35}
-                              height={35}
-                              onClick={() =>
-                                handleColorSelect(item._id, colorOption.color, colorOption.images[0])
-                              }
-                              className={`rounded-md border cursor-pointer ${
-                                item.selectedColor === colorOption.color
-                                  ? "border-blue-500 ring-2 ring-blue-300"
-                                  : "border-gray-300"
-                              }`}
-                            />
-                            <p className="text-xs">{colorOption.color}</p>
-                          </div>
-                        ))}
+                      <div className="flex gap-2 mt-2 flex-wrap">
+                        <p>Select one</p>
+                        {product.productColors.map((colorOption) => {
+                          const isSelected = item.selectedColor === colorOption.color;
+                          return (
+                            <div key={colorOption.color} className="text-center">
+                              <Image
+                                src={colorOption.images[0]}
+                                alt={colorOption.color}
+                                width={40}
+                                height={40}
+                                onClick={() =>
+                                  handleColorSelect(item._id, colorOption.color, colorOption.images[0])
+                                }
+                                className={`rounded-md cursor-pointer transition duration-200 border-2 ${
+                                  isSelected
+                                    ? "border-blue-600 ring-2 ring-blue-300"
+                                    : "border-gray-300 hover:border-gray-500"
+                                }`}
+                              />
+                              <p className="text-xs mt-1">{colorOption.color}</p>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -215,7 +274,7 @@ const OrderPage = () => {
 
               <div className="text-right font-semibold">Subtotal: ${subtotal.toFixed(2)}</div>
               <div className="text-right text-sm text-gray-700">
-                Delivery Cost: ${DELIVERY_COST.toFixed(2)}
+                Delivery Cost: ${addressForm.deliveryCost.toFixed(2)}
               </div>
               <div className="text-right font-bold text-lg text-green-600">
                 Grand Total: ${grandTotal.toFixed(2)}
@@ -225,7 +284,7 @@ const OrderPage = () => {
         </section>
 
         {/* Address Form */}
-        <AddressForm form={addressForm} setForm={setAddressForm} />
+        <AddressForm ref={addressFormRef} form={addressForm} setForm={setAddressForm} />
       </div>
 
       {/* Payment Method */}
@@ -241,16 +300,6 @@ const OrderPage = () => {
               onChange={() => setPaymentMethod("cod")}
             />
             Cash on Delivery
-          </label>
-          <label className="flex items-center gap-2 text-sm md:text-base">
-            <input
-              type="radio"
-              name="payment"
-              value="bkash"
-              checked={paymentMethod === "bkash"}
-              onChange={() => setPaymentMethod("bkash")}
-            />
-            Bkash / Nagad
           </label>
         </div>
       </section>

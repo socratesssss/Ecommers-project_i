@@ -9,76 +9,164 @@ type OrderItem = {
   quantity: number;
   total: number;
 };
-
-type Order = {
+type ApiOrder = {
+  _id: string;
   orderDate: string;
   products: OrderItem[];
   deliveryCost: number;
   total: number;
+  pending?: boolean;
+};
+type Order = {
+  orderId: string;
+  orderDate: string;
+  products: OrderItem[];
+  deliveryCost: number;
+  total: number;
+  status: 'pending' | 'delivered' | 'canceled';
 };
 
-
 const OrdersPage = () => {
-    
   const [orders, setOrders] = useState<Order[]>([]);
+  const port = 'http://localhost:4000'; // Your API base URL
 
   useEffect(() => {
-    const stored = localStorage.getItem('orders');
-    if (stored) {
-      const parsedOrders: Order[] = JSON.parse(stored);
+    async function fetchOrders() {
+      try {
+        const res = await fetch(`${port}/api/order`);
+        if (!res.ok) throw new Error('Failed to fetch orders');
+        const data = await res.json();
 
-      // Sort by latest first
-      const sortedOrders = parsedOrders.sort(
-        (a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
-      );
+        if (!Array.isArray(data.orders)) {
+          setOrders([]);
+          return;
+        }
 
-      setOrders(sortedOrders);
+        const normalizedOrders: Order[] = data.orders.map((order: ApiOrder) => {
+          // Determine status based on products and pending flag
+          let status: 'pending' | 'delivered' | 'canceled' = 'canceled';
+
+          if (order.products && order.products.length > 0) {
+            status = order.pending === false ? 'delivered' : 'pending';
+          }
+
+          return {
+            orderId: order._id,
+            orderDate: order.orderDate,
+            products: order.products || [],
+            deliveryCost: order.deliveryCost || 0,
+            total: order.total || 0,
+            status,
+          };
+        });
+
+        // Sort orders by latest date first
+        const sortedOrders = normalizedOrders.sort(
+          (a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
+        );
+
+        setOrders(sortedOrders);
+      } catch (err) {
+        console.error(err);
+        setOrders([]);
+      }
     }
+
+    fetchOrders();
   }, []);
 
   if (orders.length === 0) {
     return <p className="text-center py-10">No orders found.</p>;
   }
-console.log(orders)
+
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-8">
       <h1 className="text-2xl font-bold mb-4 text-center">My Orders</h1>
 
-      {orders.map((order, index) => (
+      {orders.map((order) => (
         <section
-          key={index}
-          className="bg-white border-y border-gray-200 space-y-4"
+          key={order.orderId}
+          className="bg-white border border-gray-200 shadow-sm rounded-md p-4 space-y-4"
         >
-          <h2 className="text-lg font-semibold text-gray-700">
-            {new Date(order.orderDate).toLocaleString('en-US', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true,
-            })}
-          </h2>
-
-          {order.products?.map((item: OrderItem, idx: number) => (
-            <div key={idx} className="flex items-center gap-4 border-b pb-2">
-              <Image
-                src={item.image}
-                alt={item.name}
-                width={64}
-                height={64}
-                className="rounded-md object-cover"
-              />
-              <div className="flex-1">
-                <h3 className="font-semibold">{item.name}</h3>
-                <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-              </div>
-              <p className="font-semibold text-orange-500">
-                ${item.total.toFixed(2)}
+          {/* Order Header */}
+          <div className="flex items-center justify-between">
+            <div>
+          
+              <p className="text-sm text-gray-500">
+                {new Date(order.orderDate).toLocaleString('en-US', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+                })}
               </p>
             </div>
-          ))}
 
+            <span
+              className={`px-3 py-1 text-sm rounded-full font-semibold ${
+                order.status === 'delivered'
+                  ? 'bg-green-100 text-green-700'
+                  : order.status === 'pending'
+                  ? 'bg-yellow-100 text-yellow-700'
+                  : 'bg-red-100 text-red-700' // canceled
+              }`}
+            >
+              {order.status === 'delivered'
+                ? 'Delivered'
+                : order.status === 'pending'
+                ? 'Pending'
+                : 'Canceled'}
+            </span>
+          </div>
+
+          {/* Order Items */}
+          {order.products.length > 0 ? (
+            order.products.map((item, idx) => (
+              <div key={idx} className="flex items-center gap-4 border-b pb-2">
+                <Image
+                  src={item.image}
+                  alt={item.name}
+                  width={64}
+                  height={64}
+                  className="rounded-md object-cover"
+                />
+                <div className="flex-1">
+                  <h3 className="font-semibold">{item.name}</h3>
+                  <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                </div>
+                <p className="font-semibold text-orange-500">
+                  ${item.total.toFixed(2)}
+                </p>
+              </div>
+            ))
+          ) : (
+            // <p className="text-center text-red-600 font-semibold">
+            //   This order was canceled or contains no products.
+            // </p>
+             order.products.map((item, idx) => (
+              <div key={idx} className="flex items-center gap-4 border-b pb-2">
+                <Image
+                  src={item.image}
+                  alt={item.name}
+                  width={64}
+                  height={64}
+                  className="rounded-md object-cover"
+                />
+                <div className="flex-1">
+                  <h3 className="font-semibold">{item.name}</h3>
+                  <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                </div>
+                <p className="font-semibold text-orange-500">
+                  ${item.total.toFixed(2)}
+                </p>
+              </div>
+            ))
+            
+          )}
+
+          {/* Footer */}
           <div className="text-right text-sm text-gray-700">
             Delivery Cost: ${order.deliveryCost.toFixed(2)}
           </div>

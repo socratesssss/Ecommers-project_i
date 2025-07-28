@@ -68,6 +68,7 @@ const CartPage = () => {
               exists: false,
               inStock: false,
             };
+            console.log(err)
           }
         })
       );
