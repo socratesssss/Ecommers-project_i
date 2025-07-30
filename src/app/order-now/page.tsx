@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState ,useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, Check, X } from "lucide-react";
+import Link from "next/link";
 import AddressForm from "@/app/components/Delibary";
 import Locations from "../../data/AddressData";
-import Link from "next/link";
 import { AddressFormHandle } from "@/app/components/Delibary";
+import OrderNowPageSkeleton from "./skeleton";
 
 // Types
 type ProductColor = {
@@ -38,7 +39,7 @@ export interface DeliveryDetails {
 }
 
 const OrderNowPage = () => {
-  const port = 'http://localhost:4000'
+  const port = 'http://localhost:4000';
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [product, setProduct] = useState<OrderProduct | null>(null);
@@ -47,6 +48,7 @@ const OrderNowPage = () => {
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "bkash">("cod");
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const addressFormRef = useRef<AddressFormHandle>(null);
 
@@ -61,6 +63,7 @@ const OrderNowPage = () => {
     road: "",
     deliveryCost: 0,
   });
+
 
   useEffect(() => {
     const saved = localStorage.getItem("deliveryForm");
@@ -82,18 +85,18 @@ const OrderNowPage = () => {
           if (!res.ok) throw new Error("Product not found");
           const data = await res.json();
 
-setProduct({
-  ...parsed,
-  price: { amount: data.discountPrice || data.price },
-  inStock: data.inStock,  // <-- ADD THIS LINE
-  imageUrl: parsed.imageUrl || data.images?.[0] || "/placeholder.jpg",
-  allColors: data.productColors || [],
-});
-
-
+          setProduct({
+            ...parsed,
+            price: { amount: data.discountPrice || data.price },
+            inStock: data.inStock,
+            imageUrl: parsed.imageUrl || data.images?.[0] || "/placeholder.jpg",
+            allColors: data.productColors || [],
+          });
+           setIsLoading(false);
         } catch (error) {
+           setIsLoading(false);
           setProduct(parsed);
-          console.log(error)
+          console.log(error);
         }
 
         setQuantity(parsed.quantity || 1);
@@ -103,256 +106,323 @@ setProduct({
     fetchOrderProduct();
   }, []);
 
-useEffect(() => {
-  const { country, division, city, area } = form;
-  if (country && division && city && area) {
-    const cost =
-      Locations?.[country]?.[division]?.[city]?.[area]?.deliveryCost;
-    if (cost !== undefined && cost !== form.deliveryCost) {
-      setDeliveryCost(cost);
-      setForm((prev) => ({ ...prev, deliveryCost: cost }));
+  useEffect(() => {
+    const { country, division, city, area } = form;
+    if (country && division && city && area) {
+      const cost =
+        Locations?.[country]?.[division]?.[city]?.[area]?.deliveryCost;
+      if (cost !== undefined && cost !== form.deliveryCost) {
+        setDeliveryCost(cost);
+        setForm((prev) => ({ ...prev, deliveryCost: cost }));
+      }
     }
-  }
-}, [form]);
-
+  }, [form]);
 
   useEffect(() => {
-  if (product && !selectedImage) {
-    setSelectedImage(product.imageUrl);
-  }
-}, [product, selectedImage]);
-
+    if (product && !selectedImage) {
+      setSelectedImage(product.imageUrl);
+    }
+  }, [product, selectedImage]);
 
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
   const decreaseQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-//   const validateForm = (formData: any) => {
-//   const errors: any = {};
 
-// if (!formData.road || formData.road.trim().length < 3) {
-//   errors.road = "Road is required.";
-// }
-// if (!formData.area) {
-//   errors.area = "Area is required.";
-// }
-// if (!formData.city) {
-//   errors.city = "City is required.";
-// }
-// if (!formData.division) {
-//   errors.division = "Division is required.";
-// }
+  const handleConfirm = async () => {
+    if (!product) return;
 
-
-//   // Add any other fields like area, city, etc.
-//   return errors;
-// };
-
-
-const handleConfirm = async () => {
-  if (!product) return;
-
-  // ✅ Call the validation method from AddressForm
-  const isFormValid = addressFormRef.current?.validateForm();
-  if (!isFormValid) {
-    setLoading(false);
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const validatedProduct = {
-      _id: product._id,
-      name: product.productName.original,
-      image: selectedImage || product.imageUrl,
-      quantity: quantity,
-      selectedColor: selectedColor || "",
-      pricePerUnit: product.price.amount,
-      inStock: product.inStock === true,
-    };
-
-    if (!validatedProduct.inStock) {
-      alert(`❌ ${validatedProduct.name} is out of stock.`);
+    const isFormValid = addressFormRef.current?.validateForm();
+    if (!isFormValid) {
       setLoading(false);
       return;
     }
 
-    const subtotal = validatedProduct.pricePerUnit * validatedProduct.quantity;
-    const total = subtotal + deliveryCost;
+    setLoading(true);
+    try {
+      const validatedProduct = {
+        _id: product._id,
+        name: product.productName.original,
+        image: selectedImage || product.imageUrl,
+        quantity: quantity,
+        selectedColor: selectedColor || "",
+        pricePerUnit: product.price.amount,
+        inStock: product.inStock === true,
+      };
 
-    const orderData = {
-      products: [
-        {
-          ...validatedProduct,
-          total: subtotal,
-        },
-      ],
-      address: form,
-      deliveryCost,
-      subtotal,
-      total,
-      paymentMethod,
-      orderDate: new Date().toISOString(),
-    };
+      if (!validatedProduct.inStock) {
+        alert(`❌ ${validatedProduct.name} is out of stock.`);
+        setLoading(false);
+        return;
+      }
 
-    const response = await fetch(`http://localhost:4000/api/order`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(orderData),
-    });
+      const subtotal = validatedProduct.pricePerUnit * validatedProduct.quantity;
+      const total = subtotal + deliveryCost;
 
-    if (!response.ok) throw new Error("Order failed");
+      const orderData = {
+        products: [
+          {
+            ...validatedProduct,
+            total: subtotal,
+          },
+        ],
+        address: form,
+        deliveryCost,
+        subtotal,
+        total,
+        paymentMethod,
+        orderDate: new Date().toISOString(),
+      };
 
-    localStorage.removeItem("orderNowProduct");
+      const response = await fetch(`http://localhost:4000/api/order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
 
-    const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-    const newOrder = {
-      orderDate: orderData.orderDate,
-      products: orderData.products.map((p) => ({
-        name: p.name,
-        image: p.image,
-        quantity: p.quantity,
-        total: p.total,
-      })),
-      deliveryCost: orderData.deliveryCost,
-      total: orderData.total,
-    };
+      if (!response.ok) throw new Error("Order failed");
 
-    localStorage.setItem("orders", JSON.stringify([...existingOrders, newOrder]));
-    setShowSuccess(true);
-  } catch (err) {
-    console.error("Order failed:", err);
-    alert("⚠️ Failed to place the order.");
-  } finally {
-    setLoading(false);
-  }
-};
+      localStorage.removeItem("orderNowProduct");
+
+      const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+      const newOrder = {
+        orderDate: orderData.orderDate,
+        products: orderData.products.map((p) => ({
+          name: p.name,
+          image: p.image,
+          quantity: p.quantity,
+          total: p.total,
+        })),
+        deliveryCost: orderData.deliveryCost,
+        total: orderData.total,
+      };
+
+      localStorage.setItem("orders", JSON.stringify([...existingOrders, newOrder]));
+      setShowSuccess(true);
+    } catch (err) {
+      console.error("Order failed:", err);
+      alert("⚠️ Failed to place the order.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
-  if (!product) return <p className="p-8 text-center">No product selected.</p>;
+  if (isLoading) {
+  return <OrderNowPageSkeleton />;
+}
+  if (!product) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+        <X className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">No Product Selected</h2>
+        <p className="text-gray-600 mb-6">Please select a product to proceed with your order.</p>
+        <Link
+          href="/products"
+          className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+        >
+          Browse Products
+        </Link>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 pb-14 space-y-10">
-      <div className="grid md:grid-cols-2 gap-6">
-        <section className="px-6 rounded-md shadow bg-white space-y-4">
-          <div className="w-full aspect-[4/3] relative rounded-md overflow-hidden">
-            <Image
-              src={selectedImage || product.imageUrl}
-              alt="Product"
-              fill
-              className="object-cover rounded-md"
-            />
-          </div>
+    <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 py-8">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        {/* Header */}
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <h1 className="text-2xl font-bold text-gray-800">Complete Your Order</h1>
+          <p className="text-sm text-gray-600">Review your items and shipping details</p>
+        </div>
 
-          <h3 className="font-semibold text-lg">{product.productName.original}</h3>
-
-          <p className="text-orange-500 font-bold text-xl mt-2">
-            ${product.price.amount.toFixed(2)}
-          </p>
-
-          <div className="flex items-center gap-3 mt-4">
-            <button
-              onClick={decreaseQuantity}
-              className="w-8 h-8 bg-gray-200 rounded hover:bg-gray-300"
-            >
-              <Minus size={16} />
-            </button>
-            <span className="text-lg font-semibold">{quantity}</span>
-            <button
-              onClick={increaseQuantity}
-              className="w-8 h-8 bg-gray-200 rounded hover:bg-gray-300"
-            >
-              <Plus size={16} />
-            </button>
-          </div>
-
-          {product.allColors && product.allColors.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              <p>Select one</p>
-              {product.allColors.flatMap((color) =>
-                color.images.map((image) => (
-                  <button
-                    key={image}
-                    onClick={() => {
-                      setSelectedImage(image);
-                      setSelectedColor(color.color);
-                    }}
-                    className={`p border rounded ${
-                      selectedImage === image
-                        ? "ring-2 ring-gray-800"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <Image
-                      src={image || "/placeholder.jpg"}
-                      alt={color.color}
-                      width={40}
-                      height={40}
-                      className="rounded object-cover"
-                    />
-                  </button>
-                ))
-              )}
-            </div>
-          )}
-
-          <p className="mt-4 text-md">
-            Delivery Cost:{" "}
-            <span className="font-semibold text-blue-600">
-              ${deliveryCost.toFixed(2)}
-            </span>
-          </p>
-          <p className="text-md font-semibold">
-            Total: ${((product.price.amount * quantity) + deliveryCost).toFixed(2)}
-          </p>
-        </section>
-
-        <div className="space-y-6">
-          <AddressForm form={form} setForm={setForm}  ref={addressFormRef}  />
-
-          <section className="p-4 rounded-md shadow-sm bg-white">
-            <h2 className="text-xl font-bold mb-4 text-center">Payment Method</h2>
-            <div className="flex gap-6">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  value="cod"
-                  checked={paymentMethod === "cod"}
-                  onChange={() => setPaymentMethod("cod")}
+        <div className="p-6 grid md:grid-cols-2 gap-8">
+          {/* Product Section */}
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row gap-6">
+              <div className="w-full sm:w-1/2 aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                <Image
+                  src={selectedImage || product.imageUrl}
+                  alt={product.productName.original}
+                  width={500}
+                  height={500}
+                  className="w-full h-full object-cover"
                 />
-                Cash on Delivery
-              </label>
-           
+              </div>
+
+              <div className="w-full sm:w-1/2 space-y-4">
+                <h2 className="text-xl font-semibold text-gray-800">{product.productName.original}</h2>
+                
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl font-bold text-orange-600">
+                    ${product.price.amount.toFixed(2)}
+                  </span>
+                  {product.inStock ? (
+                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                      In Stock
+                    </span>
+                  ) : (
+                    <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                      Out of Stock
+                    </span>
+                  )}
+                </div>
+
+                {/* Quantity Selector */}
+                <div className="flex items-center gap-4 mt-4">
+                  <span className="text-sm font-medium text-gray-700">Quantity:</span>
+                  <div className="flex items-center gap-3 border border-gray-300 rounded-lg px-3 py-1">
+                    <button
+                      onClick={decreaseQuantity}
+                      className="text-gray-600 hover:text-gray-900 transition-colors"
+                      disabled={quantity <= 1}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="w-8 text-center font-medium">{quantity}</span>
+                    <button
+                      onClick={increaseQuantity}
+                      className="text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Color Variants */}
+                {product.allColors && product.allColors.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Select Color:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {product.allColors.map((color) => (
+                        <button
+                          key={color._id}
+                          onClick={() => {
+                            setSelectedImage(color.images[0]);
+                            setSelectedColor(color.color);
+                          }}
+                          className={`p-1 border rounded-full ${
+                            selectedColor === color.color
+                              ? 'ring-2 ring-offset-2 ring-orange-500'
+                              : 'border-gray-300'
+                          }`}
+                        >
+                          <div className="w-8 h-8 rounded-full overflow-hidden">
+                            <Image
+                              src={color.images[0] || "/placeholder.jpg"}
+                              alt={color.color}
+                              width={32}
+                              height={32}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Order Summary */}
+                <div className="mt-6 pt-4 border-t border-gray-200 space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Subtotal:</span>
+                    <span className="font-medium">
+                      ${(product.price.amount * quantity).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Delivery:</span>
+                    <span className="font-medium">${deliveryCost.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-gray-200">
+                    <span className="font-semibold">Total:</span>
+                    <span className="font-bold text-lg text-orange-600">
+                      ${((product.price.amount * quantity) + deliveryCost).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </section>
+
+            {/* Payment Method */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold mb-4">Payment Method</h3>
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg hover:border-orange-500 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="payment"
+                    checked={paymentMethod === "cod"}
+                    onChange={() => setPaymentMethod("cod")}
+                    className="h-4 w-4 text-orange-600 focus:ring-orange-500"
+                  />
+                  <div>
+                    <span className="block font-medium">Cash on Delivery</span>
+                    <span className="block text-sm text-gray-500">Pay when you receive your order</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Shipping Details */}
+          <div className="space-y-6">
+            <div className="bg-white  rounded-lg border border-gray-200">
+             
+              <AddressForm form={form} setForm={setForm} ref={addressFormRef} />
+            </div>
+
+            {/* Confirm Button */}
+            <button
+              onClick={handleConfirm}
+              disabled={loading || !product.inStock}
+              className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
+                loading
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : !product.inStock
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700'
+              }`}
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </span>
+              ) : (
+                `Confirm Order - $${((product.price.amount * quantity) + deliveryCost).toFixed(2)}`
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="text-center mt-8">
-        <button
-          onClick={handleConfirm}
-          disabled={loading}
-          className={`bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-md ${
-            loading ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          {loading ? "Placing Order..." : "Confirm Order"}
-        </button>
-      </div>
-
+      {/* Success Modal */}
       {showSuccess && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-md text-center space-y-4">
-            <h2 className="text-2xl font-bold text-green-600">
-              🎉 Order Successful!
-            </h2>
-            <p className="text-gray-700">
-              Your order has been placed and saved successfully.
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+              <Check className="h-6 w-6 text-green-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Order Placed Successfully!</h2>
+            <p className="text-gray-600 mb-6">
+              Your order has been confirmed and will be processed shortly. We&apos;ve sent a confirmation to your email.
             </p>
-            <Link
-              href="/"
-              className="inline-block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
-            >
-              Close
-            </Link>
+            <div className="flex gap-3 justify-center">
+              <Link
+                href="/orders"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                View Orders
+              </Link>
+              <Link
+                href="/"
+                className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors"
+              >
+                Continue Shopping
+              </Link>
+            </div>
           </div>
         </div>
       )}
