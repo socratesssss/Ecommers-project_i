@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 
 const CartPage = () => {
-  const port = "http://localhost:4000";
+const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
   const cartItems = useSelector(
     (state: RootState) => state.cart.items as CartItem[]
   );
@@ -77,7 +77,7 @@ const CartPage = () => {
     };
 
     if (cartItems.length > 0) fetchProductStatus();
-  }, [cartItems]);
+  }, [cartItems, port]);
 
   const sortedCartItems = [...cartItems].sort((a, b) => {
     const statusA = productStatusMap[a._id];

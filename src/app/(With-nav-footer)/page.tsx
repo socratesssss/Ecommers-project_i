@@ -48,12 +48,13 @@ const ProductCardSkeleton = () => {
 };
 
 const HomePage = () => {
-  const port = 'http://localhost:4000';
+  const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
+  console.log("Backend URL:", port);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 20;
   const searchTerm = '';
   const [filters, setFilters] = useState<Filters>({
     categories: [],
@@ -99,7 +100,14 @@ const HomePage = () => {
     };
 
     fetchProducts();
-  }, [currentPage, filters, searchTerm]);
+  }, [currentPage, filters, searchTerm, port]);
+
+  
+   useEffect(() => {
+    fetch('http://localhost:4000/api/visit/track', {
+      method: 'POST',
+    });
+  }, []);
 
   return (
     <div>

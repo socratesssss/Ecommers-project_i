@@ -70,7 +70,7 @@ const OrderSkeleton = () => {
 const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const port = 'http://localhost:4000';
+  const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     async function fetchOrders() {
@@ -114,7 +114,7 @@ const OrdersPage = () => {
     }
 
     fetchOrders();
-  }, []);
+  }, [ port]);
 
   if (loading) {
     return <OrderSkeleton />;

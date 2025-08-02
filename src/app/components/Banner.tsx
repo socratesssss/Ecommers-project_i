@@ -13,7 +13,7 @@ type Banner = {
 };
 
 export default function Banner() {
-    const port = 'http://localhost:4000'
+   const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
   // banners is an array of strings (URLs)
   const [banners, setBanners] = useState<Banner[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -33,7 +33,7 @@ export default function Banner() {
       }
     };
     fetchBanners();
-  }, []);
+  }, [ port]);
 
   useEffect(() => {
     // Auto-slide every 5 seconds if banners loaded

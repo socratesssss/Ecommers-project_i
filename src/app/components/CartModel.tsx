@@ -20,17 +20,17 @@ type CartItem = {
 };
 
 const CartModel = () => {
-  const port = 'http://localhost:4000'; // Make sure your Express server is running on this port
+const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const dispatch = useDispatch();
-  const [isOpen, setIsOpen] = useState(true); // You might want this to be controlled by a parent component
+  const [isOpen, setIsOpen] = useState(true); 
   const cartRef = useRef<HTMLDivElement>(null);
 
   const [productStatusMap, setProductStatusMap] = useState<
     Record<string, { exists: boolean; inStock: boolean }>
   >({});
 
-  // Calculate subtotal for all items in cart (including potentially unavailable ones for initial display)
+
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price.amount * item.quantity,
     0

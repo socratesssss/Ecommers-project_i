@@ -27,7 +27,7 @@ type SearchBoxProps = {
 };
 
 const SearchBox: React.FC<SearchBoxProps> = ({ className = "" }) => {
-    const port = 'http://localhost:4000'
+   const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Product[]>([]);
@@ -62,7 +62,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = "" }) => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [query]);
+  }, [query, port]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {

@@ -26,7 +26,7 @@ type Product = {
 };
 
 const ProductPage = () => {
-  const port = 'http://localhost:4000';
+ const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
   const dispatch = useDispatch();
   const router = useRouter();
   const params = useParams();
@@ -61,7 +61,7 @@ const ProductPage = () => {
     if (productId) {
       fetchProduct();
     }
-  }, [productId]);
+  }, [productId, port]);
 
   useEffect(() => {
     setSelectedColor(null);

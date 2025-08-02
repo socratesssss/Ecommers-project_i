@@ -47,7 +47,8 @@ type CartItem = {
 };
 
 const OrderPage = () => {
-  const port = "http://localhost:4000";
+ const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const dispatch = useDispatch();
   const [checkoutItems, setCheckoutItems] = useState<CartItem[]>([]);
   const [productsDB, setProductsDB] = useState<ApiFetchedProduct[]>([]);
@@ -69,22 +70,34 @@ const OrderPage = () => {
   });
 
   // Calculate delivery cost when location fields change
-  useEffect(() => {
-    const calculateDeliveryCost = () => {
-      const { division, city, area } = addressForm;
-      if (division && city && area) {
-        const cost = Locations?.Bangladesh?.[division]?.[city]?.[area]?.deliveryCost;
-        if (cost !== undefined) {
-          setAddressForm(prev => ({
-            ...prev,
-            deliveryCost: cost
-          }));
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const calculateDeliveryCost = () => {
+  //     const { division, city, area } = addressForm;
+  //     if (division && city && area) {
+  //       const cost = Locations?.Bangladesh?.[division]?.[city]?.[area]?.deliveryCost;
+  //       if (cost !== undefined) {
+  //         setAddressForm(prev => ({
+  //           ...prev,
+  //           deliveryCost: cost
+  //         }));
+  //       }
+  //     }
+  //   };
     
-    calculateDeliveryCost();
-  }, [addressForm.division, addressForm.city, addressForm.area,addressForm]);
+  //   calculateDeliveryCost();
+  // }, [addressForm.division, addressForm.city, addressForm.area,addressForm]);
+
+  useEffect(() => {
+  if (addressForm.division && addressForm.city && addressForm.area) {
+    const cost = Locations?.Bangladesh?.[addressForm.division]?.[addressForm.city]?.[addressForm.area]?.deliveryCost;
+    if (cost !== undefined && cost !== addressForm.deliveryCost) {
+      setAddressForm(prev => ({
+        ...prev,
+        deliveryCost: cost
+      }));
+    }
+  }
+}, [addressForm.deliveryCost,addressForm.division, addressForm.city, addressForm.area]);
 
   // Load checkoutItems from localStorage
   useEffect(() => {
@@ -92,7 +105,7 @@ const OrderPage = () => {
     if (stored) {
       setCheckoutItems(JSON.parse(stored));
     }
-  }, []);
+  }, [ port]);
 
   // Load product data from DB
   useEffect(() => {
@@ -107,7 +120,7 @@ const OrderPage = () => {
         console.error("Error fetching products:", err);
         setLoading(false);
       });
-  }, []);
+  }, [ port]);
 
   // Show skeleton while loading
   if (loading) {

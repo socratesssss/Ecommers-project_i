@@ -4,9 +4,9 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Minus, Plus, Check, X } from "lucide-react";
 import Link from "next/link";
-import AddressForm from "@/app/components/Delibary";
+import AddressForm from "../components/Delibary";
 import Locations from "../../data/AddressData";
-import { AddressFormHandle } from "@/app/components/Delibary";
+import { AddressFormHandle } from "../components/Delibary";
 import OrderNowPageSkeleton from "./skeleton";
 
 // Types
@@ -39,7 +39,7 @@ export interface DeliveryDetails {
 }
 
 const OrderNowPage = () => {
-  const port = 'http://localhost:4000';
+const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [product, setProduct] = useState<OrderProduct | null>(null);
@@ -104,7 +104,7 @@ const OrderNowPage = () => {
     };
 
     fetchOrderProduct();
-  }, []);
+  }, [ port]);
 
   useEffect(() => {
     const { country, division, city, area } = form;
@@ -172,7 +172,7 @@ const OrderNowPage = () => {
         orderDate: new Date().toISOString(),
       };
 
-      const response = await fetch(`http://localhost:4000/api/order`, {
+      const response = await fetch(`${port}/api/order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
