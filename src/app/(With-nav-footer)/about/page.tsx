@@ -112,7 +112,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gradient-to-br from-[#fdf6e3] via-[#e0f7fa] to-[#f0fdf4]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 ">
       <div className="text-center mb-16">
         <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#0284c7] to-[#0f766e] mb-4">
           {pageContent.title}

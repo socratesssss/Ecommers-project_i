@@ -12,25 +12,39 @@ type FilterProps = {
   }) => void;
 };
 
-const categories = ['All', 'Juice', 'Vape', 'Pods'];
-
-
-
-
-
 const ProductFilter = ({ onFilterChange }: FilterProps) => {
+  const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['All']);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [sortOrder, setSortOrder] = useState<'lowToHigh' | 'highToLow' | ''>('');
   const [showPriceFilters, setShowPriceFilters] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${port}/api/categories`);
+        const data = await response.json();
+        setCategories(['All', ...data.categories]); // Add "All" option
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [port]);
 
   useEffect(() => {
     // Prepare categories array for backend
     const categoriesForFilter =
       selectedCategories.includes('All') || selectedCategories.length === 0
         ? []
-        : selectedCategories;
+        : selectedCategories.filter(cat => cat !== 'All'); // Remove "All" before sending
 
     onFilterChange({
       categories: categoriesForFilter,
@@ -63,9 +77,6 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
     }
   };
 
-  
-
-  // Optional: Restrict input to positive numbers for price fields
   const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (/^\d*$/.test(val)) setMinPrice(val);
@@ -75,6 +86,20 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
     const val = e.target.value;
     if (/^\d*$/.test(val)) setMaxPrice(val);
   };
+
+  if (loading) {
+    return (
+      <div className="border-b p-4 bg-white mb-6">
+        <div className="flex flex-wrap lg:items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-3">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-8 w-20 bg-gray-200 rounded animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="border-b p-4 bg-white mb-6">

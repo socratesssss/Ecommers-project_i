@@ -16,7 +16,7 @@ type Product = {
   name: string;
   price: number;
   discountPrice?: number;
-  category: "Vape" | "Juice" | "Pods";
+  category: "Vape" | "Juice" | "Pods"|"Kits";
   images: string[];
   inStock: boolean;
   miniDescription: string;
@@ -32,6 +32,7 @@ type Filters = {
 };
 
 const ProductCardSkeleton = () => {
+  
   return (
     <div className="bg-white rounded-2xl shadow-md overflow-hidden p-2 animate-pulse">
       {/* Image placeholder */}
@@ -102,12 +103,12 @@ const HomePage = () => {
     fetchProducts();
   }, [currentPage, filters, searchTerm, port]);
 
-  
+  // tracki
    useEffect(() => {
-    fetch('http://localhost:4000/api/visit/track', {
+    fetch(`${port}/api/visit/track`, {
       method: 'POST',
     });
-  }, []);
+  }, [port]);
 
   return (
     <div>

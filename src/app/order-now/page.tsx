@@ -32,11 +32,12 @@ export interface DeliveryDetails {
   email: string;
   country: string;
   division: string;
-  city: string;
-  area: string;
-  road: string;
+  district: string;  // Changed from 'city'
+  upazila: string;   // Changed from 'area'
+  addressDetails: string;  // Changed from 'road'
   deliveryCost: number;
 }
+
 
 const OrderNowPage = () => {
 const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -52,17 +53,17 @@ const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const addressFormRef = useRef<AddressFormHandle>(null);
 
-  const [form, setForm] = useState<DeliveryDetails>({
-    name: "",
-    phone: "",
-    email: "",
-    country: "Bangladesh",
-    division: "",
-    city: "",
-    area: "",
-    road: "",
-    deliveryCost: 0,
-  });
+ const [form, setForm] = useState<DeliveryDetails>({
+  name: "",
+  phone: "",
+  email: "",
+  country: "Bangladesh",
+  division: "",
+  district: "",       // was city
+  upazila: "",        // was area
+  addressDetails: "", // was road
+  deliveryCost: 0,
+});
 
 
   useEffect(() => {
@@ -106,17 +107,20 @@ const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
     fetchOrderProduct();
   }, [ port]);
 
-  useEffect(() => {
-    const { country, division, city, area } = form;
-    if (country && division && city && area) {
-      const cost =
-        Locations?.[country]?.[division]?.[city]?.[area]?.deliveryCost;
-      if (cost !== undefined && cost !== form.deliveryCost) {
-        setDeliveryCost(cost);
-        setForm((prev) => ({ ...prev, deliveryCost: cost }));
-      }
+// Then fix the delivery cost calculation useEffect:
+useEffect(() => {
+  const { country, division } = form;
+  if (country && division) {
+    const cost = Locations.Bangladesh[division as keyof typeof Locations.Bangladesh]?.deliveryCost || 0;
+    if (cost !== form.deliveryCost) {
+      setDeliveryCost(cost);
+      setForm(prev => ({ ...prev, deliveryCost: cost }));
     }
-  }, [form]);
+  } else {
+    setDeliveryCost(0);
+    setForm(prev => ({ ...prev, deliveryCost: 0 }));
+  }
+}, [form.country, form.division,form]);
 
   useEffect(() => {
     if (product && !selectedImage) {

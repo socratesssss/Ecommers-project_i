@@ -2,41 +2,40 @@
 
 import Locations from '../../data/AddressData';
 import { DeliveryDetails } from '../order-now/page';
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { FiMapPin, FiPhone, FiUser, FiMail, FiInfo } from 'react-icons/fi';
+import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
+import { FiMapPin, FiPhone, FiUser, FiMail, FiInfo, FiChevronDown } from 'react-icons/fi';
 
 type DivisionKeys = keyof typeof Locations.Bangladesh;
-type CityKeys<T extends DivisionKeys> = keyof (typeof Locations.Bangladesh)[T];
-type AreaKeys<T extends DivisionKeys, C extends CityKeys<T>> = keyof (typeof Locations.Bangladesh)[T][C];
+type DistrictKeys<T extends DivisionKeys> = keyof (typeof Locations.Bangladesh)[T]['districts'];
 
 export type AddressFormHandle = {
   validateForm: () => boolean;
+  getDeliveryCost: () => number | null;
 };
 
 type Props = {
   form: DeliveryDetails;
   setForm: React.Dispatch<React.SetStateAction<DeliveryDetails>>;
+  onDeliveryCostChange?: (cost: number | null) => void;
 };
 
-const AddressForm = forwardRef<AddressFormHandle, Props>(({ form, setForm }, ref) => {
+const AddressForm = forwardRef<AddressFormHandle, Props>(({ form, setForm, onDeliveryCostChange }, ref) => {
   const [errors, setErrors] = useState<Partial<Record<keyof DeliveryDetails, string>>>({});
+  const [deliveryCost, setDeliveryCost] = useState<number | null>(null);
 
   useImperativeHandle(ref, () => ({
     validateForm,
+    getDeliveryCost: () => deliveryCost,
   }));
 
   const handleChange = (field: keyof DeliveryDetails, value: string) => {
     setForm((prev) => {
       const updated = { ...prev, [field]: value };
       if (field === "division") {
-        updated.city = "";
-        updated.area = "";
-        updated.road = "";
-      } else if (field === "city") {
-        updated.area = "";
-        updated.road = "";
-      } else if (field === "area") {
-        updated.road = "";
+        updated.district = "";
+        updated.upazila = "";
+      } else if (field === "district") {
+        updated.upazila = "";
       }
       return updated;
     });
@@ -48,50 +47,73 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(({ form, setForm }, ref
     const newErrors: typeof errors = {};
     if (!form.name.trim()) newErrors.name = "Full Name is required";
     if (!form.phone.trim()) newErrors.phone = "Phone Number is required";
+    if (!form.phone.match(/^01[3-9]\d{8}$/)) newErrors.phone = "Invalid Bangladeshi phone number";
     if (!form.division) newErrors.division = "Division is required";
-    if (!form.city) newErrors.city = "City is required";
-    if (!form.area) newErrors.area = "Area is required";
-    if (!form.road) newErrors.road = "Road is required";
+    if (!form.district) newErrors.district = "District is required";
+    if (!form.upazila) newErrors.upazila = "Upazila is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Calculate delivery cost whenever location changes
+  useEffect(() => {
+    if (form.division) {
+      const divisionKey = form.division as DivisionKeys;
+      const cost = Locations.Bangladesh[divisionKey]?.deliveryCost || null;
+      setDeliveryCost(cost);
+      if (onDeliveryCostChange) onDeliveryCostChange(cost);
+    } else {
+      setDeliveryCost(null);
+      if (onDeliveryCostChange) onDeliveryCostChange(null);
+    }
+  }, [form.division, onDeliveryCostChange]);
+
   const divisions = Object.keys(Locations.Bangladesh) as DivisionKeys[];
   const divisionKey = form.division as DivisionKeys;
-  const cities = divisions.includes(divisionKey)
-    ? (Object.keys(Locations.Bangladesh[divisionKey]) as CityKeys<typeof divisionKey>[])
+  const districts = divisions.includes(divisionKey)
+    ? (Object.keys(Locations.Bangladesh[divisionKey].districts) as DistrictKeys<typeof divisionKey>[])
     : [];
 
-  const cityKey = form.city as CityKeys<typeof divisionKey>;
-  const areas = divisions.includes(divisionKey) && cityKey in Locations.Bangladesh[divisionKey]
-    ? (Object.keys(Locations.Bangladesh[divisionKey][cityKey]) as AreaKeys<typeof divisionKey, typeof cityKey>[])
+  const districtKey = form.district as DistrictKeys<typeof divisionKey>;
+  const upazilas = divisions.includes(divisionKey) && districtKey in Locations.Bangladesh[divisionKey].districts
+    ? Locations.Bangladesh[divisionKey].districts[districtKey].upazilas
     : [];
-
-  const areaKey = form.area as AreaKeys<typeof divisionKey, typeof cityKey>;
-  const roads = divisions.includes(divisionKey) &&
-    cityKey in Locations.Bangladesh[divisionKey] &&
-    areaKey in Locations.Bangladesh[divisionKey][cityKey]
-    ? Locations.Bangladesh[divisionKey][cityKey][areaKey].roads
-    : [];
-
-  const deliveryCost = divisions.includes(divisionKey) &&
-    cityKey in Locations.Bangladesh[divisionKey] &&
-    areaKey in Locations.Bangladesh[divisionKey][cityKey]
-    ? Locations.Bangladesh[divisionKey][cityKey][areaKey].deliveryCost
-    : null;
 
   return (
-    <div className="p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
-      <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
-        <FiMapPin className="mr-2 text-blue-500" />
-        Delivery Address
-      </h2>
+    <div className="p-4 sm:p-6 bg-white rounded-xl border border-gray-100 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+        <div className="flex-1">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center">
+            <FiMapPin className="mr-2 text-blue-600" />
+            Delivery Information
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">Enter your details for order delivery</p>
+        </div>
+        
+        {deliveryCost !== null && (
+          <div className="bg-blue-50 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
+                Delivery Cost:
+              </span>
+              <span className="text-base sm:text-lg font-bold text-blue-600 whitespace-nowrap">
+                ${deliveryCost.toFixed(2)}
+              </span>
+            </div>
+            {form.district && (
+              <p className="text-[10px] sm:text-xs text-blue-700 mt-1 text-right">
+                {form.upazila ? `${form.upazila}, ` : ''}{form.district}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {/* Personal Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name *</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <FiUser className="text-gray-400" />
@@ -101,16 +123,16 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(({ form, setForm }, ref
                 placeholder="Your full name"
                 value={form.name}
                 onChange={(e) => handleChange("name", e.target.value)}
-                className={`pl-10 p-2.5 border rounded-md w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.name ? "border-red-500" : "border-gray-300"
+                className={`pl-10 pr-3 py-2.5 border rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
+                  errors.name ? "border-red-500" : "border-gray-300 hover:border-gray-400"
                 }`}
               />
             </div>
-            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+            {errors.name && <p className="mt-1.5 text-sm text-red-600">{errors.name}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number *</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <FiPhone className="text-gray-400" />
@@ -120,17 +142,17 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(({ form, setForm }, ref
                 placeholder="01XXXXXXXXX"
                 value={form.phone}
                 onChange={(e) => handleChange('phone', e.target.value)}
-                className={`pl-10 p-2.5 border rounded-md w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.phone ? "border-red-500" : "border-gray-300"
+                className={`pl-10 pr-3 py-2.5 border rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
+                  errors.phone ? "border-red-500" : "border-gray-300 hover:border-gray-400"
                 }`}
               />
             </div>
-            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+            {errors.phone && <p className="mt-1.5 text-sm text-red-600">{errors.phone}</p>}
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <FiMail className="text-gray-400" />
@@ -140,37 +162,36 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(({ form, setForm }, ref
               placeholder="your@email.com"
               value={form.email}
               onChange={(e) => handleChange('email', e.target.value)}
-              className="pl-10 p-2.5 border border-gray-300 rounded-md w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400"
             />
           </div>
+          <p className="mt-1.5 text-xs text-gray-500">For order updates and receipts</p>
         </div>
 
         {/* Location Selectors */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Country</label>
             <div className="relative">
               <select
-                className="p-2.5 border border-gray-300 rounded-md w-full bg-gray-100 text-gray-600 cursor-not-allowed appearance-none"
+                className="pl-3 pr-8 py-2.5 border border-gray-300 rounded-lg w-full bg-gray-50 text-gray-600 cursor-not-allowed appearance-none outline-none"
                 value="Bangladesh"
                 disabled
               >
                 <option value="Bangladesh">Bangladesh</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
+                <FiChevronDown className="h-5 w-5 text-gray-400" />
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Division *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Division *</label>
             <div className="relative">
               <select
-                className={`p-2.5 border rounded-md w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none ${
-                  errors.division ? "border-red-500" : "border-gray-300"
+                className={`pl-3 pr-8 py-2.5 border rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none transition-all ${
+                  errors.division ? "border-red-500" : "border-gray-300 hover:border-gray-400"
                 }`}
                 value={form.division}
                 onChange={(e) => handleChange('division', e.target.value)}
@@ -183,119 +204,80 @@ const AddressForm = forwardRef<AddressFormHandle, Props>(({ form, setForm }, ref
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
+                <FiChevronDown className="h-5 w-5 text-gray-400" />
               </div>
             </div>
-            {errors.division && <p className="mt-1 text-sm text-red-600">{errors.division}</p>}
+            {errors.division && <p className="mt-1.5 text-sm text-red-600">{errors.division}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">District *</label>
             <div className="relative">
               <select
-                className={`p-2.5 border rounded-md w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none ${
-                  errors.city ? "border-red-500" : "border-gray-300"
+                className={`pl-3 pr-8 py-2.5 border rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none transition-all ${
+                  errors.district ? "border-red-500" : "border-gray-300 hover:border-gray-400"
                 }`}
-                value={form.city}
-                onChange={(e) => handleChange('city', e.target.value)}
+                value={form.district}
+                onChange={(e) => handleChange('district', e.target.value)}
                 disabled={!form.division}
               >
-                <option value="">Select City</option>
-                {cities.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
+                <option value="">Select District</option>
+                {districts.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
                   </option>
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
+                <FiChevronDown className="h-5 w-5 text-gray-400" />
               </div>
             </div>
-            {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
+            {errors.district && <p className="mt-1.5 text-sm text-red-600">{errors.district}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Area *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Upazila/Thana *</label>
             <div className="relative">
               <select
-                className={`p-2.5 border rounded-md w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none ${
-                  errors.area ? "border-red-500" : "border-gray-300"
+                className={`pl-3 pr-8 py-2.5 border rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none outline-none transition-all ${
+                  errors.upazila ? "border-red-500" : "border-gray-300 hover:border-gray-400"
                 }`}
-                value={form.area}
-                onChange={(e) => handleChange('area', e.target.value)}
-                disabled={!form.city}
+                value={form.upazila}
+                onChange={(e) => handleChange('upazila', e.target.value)}
+                disabled={!form.district}
               >
-                <option value="">Select Area</option>
-                {areas.map((a) => (
-                  <option key={String(a)} value={String(a)}>
-                    {String(a)}
+                <option value="">Select Upazila/Thana</option>
+                {upazilas.map((u) => (
+                  <option key={u} value={u}>
+                    {u}
                   </option>
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
+                <FiChevronDown className="h-5 w-5 text-gray-400" />
               </div>
             </div>
-            {errors.area && <p className="mt-1 text-sm text-red-600">{errors.area}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Road/Block *</label>
-            <div className="relative">
-              <select
-                className={`p-2.5 border rounded-md w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none ${
-                  errors.road ? "border-red-500" : "border-gray-300"
-                }`}
-                value={form.road}
-                onChange={(e) => handleChange('road', e.target.value)}
-                disabled={!form.area}
-              >
-                <option value="">Select Road/Block</option>
-                {roads.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
-            {errors.road && <p className="mt-1 text-sm text-red-600">{errors.road}</p>}
+            {errors.upazila && <p className="mt-1.5 text-sm text-red-600">{errors.upazila}</p>}
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Additional Details</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Address Details (Where to Deliver)</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <FiInfo className="text-gray-400" />
               </div>
-              <input
-                type="text"
-                placeholder="House #, Apartment #, Landmark, etc."
-                value={form.road}
-                onChange={(e) => handleChange('road', e.target.value)}
-                className="pl-10 p-2.5 border border-gray-300 rounded-md w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+          
+<input
+  type="text"
+  placeholder=" Road #,House #, Building, Apartment, Landmark, etc."
+  value={form.addressDetails}
+  onChange={(e) => handleChange('addressDetails', e.target.value)}
+  className="pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all hover:border-gray-400"
+/>
             </div>
-            <p className="mt-1 text-xs text-gray-500">Optional: Any additional information to help locate your address</p>
+            <p className="mt-1.5 text-xs text-gray-500">Additional information to help locate your address</p>
           </div>
         </div>
-
-        {deliveryCost !== null && (
-          <div className="p-3 bg-blue-50 rounded-md text-right">
-            <span className="text-sm font-medium text-gray-700">Estimated Delivery Cost: </span>
-            <span className="text-lg font-bold text-blue-600">৳{deliveryCost}</span>
-          </div>
-        )}
       </div>
     </div>
   );
