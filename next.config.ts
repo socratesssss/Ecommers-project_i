@@ -3,6 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
 images: {
   remotePatterns: [
+        {
+      protocol: 'https',
+      hostname: 'backend-for-project-i.onrender.com',
+      port: '', 
+      pathname: '/uploads/**',
+    },
     {
       protocol: 'http',
       hostname: 'localhost',
