@@ -1,10 +1,10 @@
-import { ReactNode } from 'react';
+// import { ReactNode } from 'react';
 
-interface ContactItemProps {
-  icon: ReactNode;
-  title: string;
-  lines: string[];
-}
+// interface ContactItemProps {
+//   icon: ReactNode;
+//   title: string;
+//   lines: string[];
+// }
 
 function ContactItem({ icon, title, lines }: { icon: React.ReactNode; title: string; lines: string[] }) {
   return (
