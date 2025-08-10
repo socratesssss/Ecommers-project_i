@@ -2,10 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+     domains: [
+      'backend-test-v0k3.onrender.com',
+      'localhost' // for development
+    ],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'backend-for-project-i.onrender.com',
+        hostname: 'backend-test-v0k3.onrender.com',
         port: '',
         pathname: '/uploads/**',
       },
