@@ -5,6 +5,7 @@ import ProductCard from "../components/Card";
 import Banner from "../components/Banner";
 import ProductFilter from "../components/categoryfilterring";
 import Pagination from "../components/Pagination";
+import { getVisitorId } from "@/utils/fingerprint";
 
 type ProductColor = {
   color: string;
@@ -104,11 +105,30 @@ const HomePage = () => {
   }, [currentPage, filters, searchTerm, port]);
 
   // tracki
-   useEffect(() => {
-    fetch(`${port}/api/visit/track`, {
-      method: 'POST',
-    });
-  }, [port]);
+useEffect(() => {
+  let mounted = true;
+
+  (async () => {
+    try {
+      const visitorId = await getVisitorId();
+
+      // Prevent double tracking during React StrictMode / dev duplicates
+      if (!mounted) return;
+
+      await fetch(`${port}/api/visit/track`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visitorId }),
+        keepalive: true // optionally helpful for navigation cases
+      });
+    } catch (err) {
+      console.error('Failed to track visit', err);
+    }
+  })();
+
+  return () => { mounted = false; };
+}, []);
+
 
   return (
     <div>
