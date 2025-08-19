@@ -15,6 +15,7 @@ type ProductCardProps = {
   discountPrice?: number;
   inStock: boolean;
   productColors?: { color: string; images: string[] }[];
+  onClick?: () => void; // ✅ Added optional onClick
 };
 
 export default function ProductCard({
@@ -25,6 +26,7 @@ export default function ProductCard({
   discountPrice,
   inStock,
   productColors = [],
+  onClick, // ✅ destructure it
 }: ProductCardProps) {
   const dispatch = useDispatch();
   const [animate, setAnimate] = useState(false);
@@ -47,14 +49,21 @@ export default function ProductCard({
     setTimeout(() => setAnimate(false), 1000);
   };
 
-  const discountPercent = discountPrice && discountPrice < price
-    ? Math.round(((price - discountPrice) / price) * 100)
-    : 0;
+  const discountPercent =
+    discountPrice && discountPrice < price
+      ? Math.round(((price - discountPrice) / price) * 100)
+      : 0;
 
-  const showDiscount = discountPrice !== undefined && discountPrice > 0 && discountPrice < price;
+  const showDiscount =
+    discountPrice !== undefined &&
+    discountPrice > 0 &&
+    discountPrice < price;
 
   return (
-    <div className="relative bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 p-2">
+    <div
+      className="relative bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 p-2"
+      onClick={onClick} // ✅ allows programmatic navigation
+    >
       {animate && (
         <div className="absolute top-3 right-3 z-50 bg-white rounded-4xl px-2 py-1 text-green-500 animate-bounce flex items-center gap-1">
           <CheckCircle className="w-5 h-5" />
@@ -62,8 +71,9 @@ export default function ProductCard({
         </div>
       )}
 
-      <Link href={`/products/${id}`}>
-        <div className="relative w-full aspect-[4/3] group">
+      {/* ✅ If no onClick passed, fallback to Link */}
+      {onClick ? (
+        <div className="relative w-full aspect-[4/3] group cursor-pointer">
           {images[0] && (
             <Image
               src={images[0]}
@@ -81,7 +91,28 @@ export default function ProductCard({
             />
           )}
         </div>
-      </Link>
+      ) : (
+        <Link href={`/products/${id}`}>
+          <div className="relative w-full aspect-[4/3] group">
+            {images[0] && (
+              <Image
+                src={images[0]}
+                alt={name}
+                fill
+                className="object-cover transition-opacity duration-500 group-hover:opacity-0"
+              />
+            )}
+            {images[1] && (
+              <Image
+                src={images[1]}
+                alt={`${name} hover`}
+                fill
+                className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+              />
+            )}
+          </div>
+        </Link>
+      )}
 
       <div className="sm:py-2 mt-2 flex flex-col">
         <h3 className="sm:text-sm text-xs font-semibold text-gray-800 line-clamp-2">
@@ -90,7 +121,7 @@ export default function ProductCard({
 
         <div className="flex justify-between text-sm sm:text-base items-center sm:mt-1">
           <p className="text-[#FB7009] font-semibold">
-            {showDiscount ? `$${discountPrice.toFixed(2)}` : `$${price.toFixed(2)}`}
+            {showDiscount ? `$${discountPrice?.toFixed(2)}` : `$${price.toFixed(2)}`}
           </p>
           {!inStock && (
             <span className="text-red-500 text-[10px] sm:text-xs font-semibold">Out of stock</span>
@@ -107,7 +138,10 @@ export default function ProductCard({
         )}
 
         <button
-          onClick={handleAdd}
+          onClick={(e) => {
+            e.stopPropagation(); // ✅ prevent firing parent onClick
+            handleAdd();
+          }}
           disabled={!inStock}
           className={`sm:mt-3 mt-2 text-xs font-semibold py-1 px-3 rounded-full flex justify-center items-center gap-2 transition-all duration-200 ease-in
             ${inStock

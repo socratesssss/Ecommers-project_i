@@ -2,11 +2,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ShoppingCart, Check } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '@/redux/cartSlice';
 import ProductPageSkeleton from './skeletn';
-
+import { localProducts } from '@/data/product';
 type ProductColor = {
   color: string;
   images: string[];
@@ -25,8 +25,9 @@ type Product = {
   productColors?: ProductColor[];
 };
 
+
+
 const ProductPage = () => {
- const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
   const dispatch = useDispatch();
   const router = useRouter();
   const params = useParams();
@@ -41,27 +42,12 @@ const ProductPage = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Load product from local database
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await fetch(`${port}/api/product/${productId}`);
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`Fetch error: ${res.status} - ${text}`);
-        }
-        const data = await res.json();
-        setProduct(data);
-      } catch (err) {
-        console.error('Error fetching product:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (productId) {
-      fetchProduct();
-    }
-  }, [productId, port]);
+    const prod = localProducts.find((p) => p._id === productId) || null;
+    setProduct(prod);
+    setLoading(false);
+  }, [productId]);
 
   useEffect(() => {
     setSelectedColor(null);
@@ -70,16 +56,10 @@ const ProductPage = () => {
 
   const getDisplayImages = () => {
     if (!product) return [];
-    if (selectedColor?.images?.length)
-      return selectedColor.images.map(img =>
-        img.startsWith('http') ? img : `${port}}/uploads/${img}`
-      );
-
+    if (selectedColor?.images?.length) return selectedColor.images;
     const base = product.images || [];
-    const colors = product.productColors?.flatMap(c => c.images) || [];
-    return [...base, ...colors].map(img =>
-      img.startsWith('http') ? img : `${port}/uploads/${img}`
-    );
+    const colors = product.productColors?.flatMap((c) => c.images) || [];
+    return [...base, ...colors];
   };
 
   const displayImages = getDisplayImages();
@@ -92,8 +72,26 @@ const ProductPage = () => {
 
   const handleAdd = () => {
     if (!product) return;
+    dispatch(
+      addToCart({
+        _id: product._id,
+        productName: { original: product.name },
+        price: { amount: product.discountPrice || product.price },
+        quantity: 1,
+        imageUrl: selectedColor?.images?.[0] || product.images?.[0] || '/placeholder.jpg',
+        inStock: product.inStock,
+        selectedColor: selectedColor?.color || null,
+        allColors: product.productColors || [],
+      })
+    );
+    setAnimate(true);
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 2000);
+  };
 
-    dispatch(addToCart({
+  const handleOrderNow = () => {
+    if (!product) return;
+    const orderProduct = {
       _id: product._id,
       productName: { original: product.name },
       price: { amount: product.discountPrice || product.price },
@@ -102,27 +100,7 @@ const ProductPage = () => {
       inStock: product.inStock,
       selectedColor: selectedColor?.color || null,
       allColors: product.productColors || [],
-    }));
-
-    setAnimate(true);
-    setShowPopup(true);
-    setTimeout(() => setShowPopup(false), 2000);
-  };
-
-  const handleOrderNow = () => {
-    if (!product) return;
-
-    const orderProduct = {
-      _id: String(product._id),
-      productName: { original: product.name },
-      price: { amount: product.discountPrice || product.price },
-      quantity: 1,
-      imageUrl: selectedColor?.images?.[0] || product.images?.[0] || '/placeholder.jpg',
-      inStock: product.inStock,
-      selectedColor: selectedColor?.color || null,
-      allColors: product.productColors || [],
     };
-
     localStorage.setItem('orderNowProduct', JSON.stringify(orderProduct));
     router.push('/order-now');
   };
@@ -153,15 +131,13 @@ const ProductPage = () => {
     scrollToIndex(0);
   };
 
-  if (loading) return (
-    <ProductPageSkeleton/>
-  );
-
-  if (!product) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-red-500 text-xl">Product not found</div>
-    </div>
-  );
+  if (loading) return <ProductPageSkeleton />;
+  if (!product)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-500 text-xl">Product not found</div>
+      </div>
+    );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10 md:flex gap-8 lg:gap-16">
@@ -175,7 +151,6 @@ const ProductPage = () => {
 
       {/* Image Gallery Section */}
       <div className="lg:sticky top-10 md:w-1/2 h-max">
-        {/* Mobile Gallery */}
         <div
           className="lg:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth"
           ref={scrollContainerRef}
@@ -184,48 +159,28 @@ const ProductPage = () => {
           {displayImages.map((img, i) => (
             <div
               key={i}
-               ref={(el: HTMLDivElement | null) => {
-    imageRefs.current[i] = el;
-  }}
+            ref={(el) => {
+  imageRefs.current[i] = el;
+}}
               className="min-w-full snap-center relative aspect-square rounded-xl overflow-hidden"
             >
-              <Image 
-                src={img} 
-                alt={`Product ${i}`}
-                fill
-                className="object-cover"
-                priority={i === 0}
-              />
+              <Image src={img} alt={`Product ${i}`} fill className="object-cover" priority={i === 0} />
             </div>
           ))}
         </div>
 
-        {/* Desktop Slider */}
         <div className="hidden lg:block w-full aspect-square rounded-xl overflow-hidden shadow-lg relative">
           {displayImages[activeImageIndex] && (
-            <Image
-              src={displayImages[activeImageIndex]}
-              alt={`Product ${activeImageIndex}`}
-              fill
-              className="object-cover"
-              priority
-            />
+            <Image src={displayImages[activeImageIndex]} alt={`Product ${activeImageIndex}`} fill className="object-cover" priority />
           )}
-          <button
-            onClick={handlePrev}
-            className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-all"
-          >
+          <button onClick={handlePrev} className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-all">
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <button
-            onClick={handleNext}
-            className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-all"
-          >
+          <button onClick={handleNext} className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition-all">
             <ChevronRight className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Dots Indicator */}
         <div className="mt-4 flex justify-center gap-2">
           {displayImages.map((_, i) => (
             <button
@@ -240,7 +195,6 @@ const ProductPage = () => {
           ))}
         </div>
 
-        {/* Thumbnails */}
         <div className="mt-4 flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           {displayImages.map((img, i) => (
             <button
@@ -251,12 +205,7 @@ const ProductPage = () => {
               }}
               className={`relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${i === activeImageIndex ? 'border-orange-500' : 'border-transparent'}`}
             >
-              <Image
-                src={img}
-                alt={`Thumbnail ${i}`}
-                fill
-                className="object-cover"
-              />
+              <Image src={img} alt={`Thumbnail ${i}`} fill className="object-cover" />
             </button>
           ))}
         </div>
@@ -267,14 +216,14 @@ const ProductPage = () => {
         <div className="space-y-4">
           <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
           <p className="text-gray-600">{product.miniDescription}</p>
-          
+
           <div className="flex items-center gap-4">
             {product.discountPrice ? (
               <>
                 <span className="text-2xl font-bold text-orange-600">${product.discountPrice.toFixed(2)}</span>
                 <span className="text-lg text-gray-500 line-through">${product.price.toFixed(2)}</span>
                 <span className="bg-orange-100 text-orange-800 text-sm px-2 py-1 rounded-full">
-                  {Math.round((product.price - product.discountPrice) / product.price * 100)}% OFF
+                  {Math.round(((product.price - product.discountPrice) / product.price) * 100)}% OFF
                 </span>
               </>
             ) : (
@@ -291,8 +240,7 @@ const ProductPage = () => {
           </div>
         </div>
 
-        {/* Color Selection */}
-        {product.productColors?.length ? (
+        {product.productColors?.length && (
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-gray-900">Color:</h3>
             <div className="flex flex-wrap gap-3">
@@ -300,15 +248,8 @@ const ProductPage = () => {
                 onClick={() => handleColorClick(null)}
                 className={`relative w-12 h-12 rounded-full overflow-hidden border-2 ${!selectedColor ? 'border-orange-500' : 'border-transparent'}`}
               >
-                <Image
-                  src={product.images[0]}
-                  alt="All colors"
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-black/30 flex items-center justify-center text-white text-xs font-bold">
-                  All
-                </div>
+                <Image src={product.images[0]} alt="All colors" fill className="object-cover" />
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center text-white text-xs font-bold">All</div>
               </button>
               {product.productColors.map((color, i) => (
                 <button
@@ -316,70 +257,50 @@ const ProductPage = () => {
                   onClick={() => handleColorClick(color)}
                   className={`relative w-12 h-12 rounded-full overflow-hidden border-2 ${selectedColor?.color === color.color ? 'border-orange-500' : 'border-transparent'}`}
                 >
-                  <Image
-                    src={color.images[0]}
-                    alt={`Color ${color.color}`}
-                    fill
-                    className="object-cover"
-                  />
+                  <Image src={color.images[0]} alt={`Color ${color.color}`} fill className="object-cover" />
                 </button>
               ))}
             </div>
           </div>
-        ) : null}
+        )}
 
-        {/* Action Buttons */}
-    <div className="flex flex-col sm:flex-row gap-3 pt-4">
-  {/* Add to Cart Button */}
-  <button
-    onClick={handleAdd}
-    disabled={!product.inStock}
-    className={`
-      flex items-center justify-center gap-2 py-3 px-4 sm:px-6 rounded-lg font-medium transition-all
-      ${product.inStock 
-        ? 'bg-orange-600 hover:bg-orange-700 text-white' 
-        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-      }
-      ${animate ? 'animate-pulse' : ''}
-      w-full sm:flex-1
-    `}
-  >
-    <ShoppingCart className="w-5 h-5" />
-    <span className="text-sm sm:text-base">Add to Cart</span>
-  </button>
+        <div className="flex flex-col sm:flex-row gap-3 pt-4">
+          <button
+            onClick={handleAdd}
+            disabled={!product.inStock}
+            className={`flex items-center justify-center gap-2 py-3 px-4 sm:px-6 rounded-lg font-medium transition-all ${
+              product.inStock ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            } ${animate ? 'animate-pulse' : ''} w-full sm:flex-1`}
+          >
+            <ShoppingCart className="w-5 h-5" />
+            <span className="text-sm sm:text-base">Add to Cart</span>
+          </button>
 
-  {/* Buy Now Button */}
-  <button
-    onClick={handleOrderNow}
-    disabled={!product.inStock}
-    className={`
-      py-3 px-4 sm:px-6 rounded-lg font-medium transition-all
-      ${product.inStock 
-        ? 'bg-gray-900 hover:bg-gray-800 text-white' 
-        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-      }
-      w-full sm:flex-1
-    `}
-  >
-    <span className="text-sm sm:text-base">Buy Now</span>
-  </button>
-</div>
+          <button
+            onClick={handleOrderNow}
+            disabled={!product.inStock}
+            className={`py-3 px-4 sm:px-6 rounded-lg font-medium transition-all ${
+              product.inStock ? 'bg-gray-900 hover:bg-gray-800 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            } w-full sm:flex-1`}
+          >
+            <span className="text-sm sm:text-base">Buy Now</span>
+          </button>
+        </div>
 
-        {/* Product Description */}
         <div className="pt-6 border-t border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Product Details</h3>
-       <div 
-  className="text-gray-800 mb-20
-    [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:mb-4
-    [&>h2]:text-xl [&>h2]:font-bold [&>h2]:mb-3
-    [&>h3]:text-lg [&>h3]:font-bold [&>h3]:mb-2
-    [&>p]:mb-4 [&>p]:leading-relaxed
-    [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4
-    [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-4"
-  dangerouslySetInnerHTML={{ 
-    __html: product.description || '<span class="text-gray-400">No description provided.</span>' 
-  }}
-/>
+          <div
+            className="text-gray-800 mb-20
+              [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:mb-4
+              [&>h2]:text-xl [&>h2]:font-bold [&>h2]:mb-3
+              [&>h3]:text-lg [&>h3]:font-bold [&>h3]:mb-2
+              [&>p]:mb-4 [&>p]:leading-relaxed
+              [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4
+              [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-4"
+            dangerouslySetInnerHTML={{
+              __html: product.description || '<span class="text-gray-400">No description provided.</span>',
+            }}
+          />
         </div>
       </div>
     </div>

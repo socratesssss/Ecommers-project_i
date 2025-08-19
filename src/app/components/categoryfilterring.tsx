@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
+
 
 type FilterProps = {
   onFilterChange: (filters: {
@@ -13,65 +14,40 @@ type FilterProps = {
 };
 
 const ProductFilter = ({ onFilterChange }: FilterProps) => {
-  const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
+  // Define categories locally
+  const localCategories = ['All', 'Electronics', 'Clothing', 'Home', 'Beauty', 'Sports'];
+  
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['All']);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [sortOrder, setSortOrder] = useState<'lowToHigh' | 'highToLow' | ''>('');
   const [showPriceFilters, setShowPriceFilters] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // Fetch categories from API
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch(`${port}/api/categories`);
-        const data = await response.json();
-        setCategories(['All', ...data.categories]); // Add "All" option
-      } catch (error) {
-        console.error('Failed to fetch categories:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, [port]);
-
-  useEffect(() => {
-    // Prepare categories array for backend
+  React.useEffect(() => {
+    // Prepare categories array for filter
     const categoriesForFilter =
       selectedCategories.includes('All') || selectedCategories.length === 0
         ? []
-        : selectedCategories.filter(cat => cat !== 'All'); // Remove "All" before sending
+        : selectedCategories.filter(cat => cat !== 'All');
 
     onFilterChange({
       categories: categoriesForFilter,
       minPrice: minPrice === '' || Number(minPrice) < 0 ? 0 : Number(minPrice),
-      maxPrice:
-        maxPrice === '' || Number(maxPrice) < 0
-          ? Infinity
-          : Number(maxPrice),
+      maxPrice: maxPrice === '' || Number(maxPrice) < 0 ? Infinity : Number(maxPrice),
       sortOrder,
     });
   }, [selectedCategories, minPrice, maxPrice, sortOrder, onFilterChange]);
 
   const handleCategoryChange = (category: string) => {
     if (category === 'All') {
-      // Select only All
       setSelectedCategories(['All']);
     } else {
-      // Select/deselect category
       let updated: string[];
       if (selectedCategories.includes(category)) {
-        // Remove category
         updated = selectedCategories.filter((c) => c !== category);
       } else {
-        // Add category
         updated = [...selectedCategories.filter((c) => c !== 'All'), category];
       }
-      // If nothing selected, revert to All
       if (updated.length === 0) updated = ['All'];
       setSelectedCategories(updated);
     }
@@ -87,26 +63,12 @@ const ProductFilter = ({ onFilterChange }: FilterProps) => {
     if (/^\d*$/.test(val)) setMaxPrice(val);
   };
 
-  if (loading) {
-    return (
-      <div className="border-b p-4 bg-white mb-6">
-        <div className="flex flex-wrap lg:items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-8 w-20 bg-gray-200 rounded animate-pulse" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="border-b p-4 bg-white mb-6">
       <div className="flex flex-wrap lg:items-center justify-between gap-4">
         {/* Categories */}
         <div className="flex flex-wrap gap-3">
-          {categories.map((cat) => (
+          {localCategories.map((cat) => (
             <button
               key={cat}
               onClick={() => handleCategoryChange(cat)}

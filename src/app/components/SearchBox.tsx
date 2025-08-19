@@ -4,36 +4,39 @@ import React, { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { localProducts } from "@/data/product";
 
-// Define the type for the product as it comes from your API
-type ApiProduct = {
-  _id: string; // Assuming _id is a string from MongoDB
-  name: string;
-  images?: string[]; // images might be an array of strings, and it's optional
-  // Add any other properties your API returns that you might use
-  // e.g., price: number; description: string;
+type ProductColor = {
+  color: string;
+  images: string[];
 };
 
 type Product = {
-  id: string;
+  _id: string;
   name: string;
-  image: string;
+  price: number;
+  discountPrice?: number;
+  category: string;
+  images: string[];
+  inStock: boolean;
+  miniDescription: string;
+  description?: string;
+  productColors?: ProductColor[];
 };
 
 type SearchBoxProps = {
-  onSearchComplete?: () => void;
-  onSearch?: (query: string) => void;
   className?: string;
+  onSearch?: (query: string) => void; // ✅ added
 };
 
-const SearchBox: React.FC<SearchBoxProps> = ({ className = "" }) => {
-   const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
+const SearchBox: React.FC<SearchBoxProps> = ({ className = "", onSearch }) => {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Product[]>([]);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // debounce search
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
@@ -41,29 +44,23 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = "" }) => {
     }
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`${port}/api/product?q=${query.trim()}&limit=5`);
-        const data = await res.json();
-        setSuggestions(
-          // Cast data.products to an array of ApiProduct
-          (data.products || [] as ApiProduct[]).map((p: ApiProduct) => ({
-            id: String(p._id), // Ensure _id is converted to string for the Product type
-            name: p.name,
-            image: p.images?.[0] || "/placeholder.png",
-          }))
-        );
-      } catch (err) {
-        console.error("Error fetching suggestions:", err);
-        setSuggestions([]);
-      }
+
+    debounceRef.current = setTimeout(() => {
+      const filtered = localProducts
+        .filter((product) =>
+          product.name.toLowerCase().includes(query.toLowerCase())
+        )
+        .slice(0, 5); // limit to 5
+
+      setSuggestions(filtered);
     }, 300);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [query, port]);
+  }, [query]);
 
+  // close suggestions if clicked outside
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -79,12 +76,25 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = "" }) => {
     if (query.trim()) {
       router.push(`/search?q=${encodeURIComponent(query.trim())}`);
       setSuggestions([]);
+      onSearch?.(query.trim()); // ✅ trigger callback
     }
   };
 
+  const handleSelectSuggestion = (id: string, name: string) => {
+    router.push(`/products/${id}`);
+    setSuggestions([]);
+    onSearch?.(name); // ✅ also trigger callback
+  };
+
   return (
-    <div className={`relative w-full max-w-[260px] ${className}`} ref={containerRef}>
-      <form onSubmit={handleSubmit} className="flex items-center border rounded-md">
+    <div
+      className={`relative w-full max-w-[260px] ${className}`}
+      ref={containerRef}
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="flex items-center border rounded-md"
+      >
         <input
           type="text"
           placeholder="Search..."
@@ -92,7 +102,11 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = "" }) => {
           onChange={(e) => setQuery(e.target.value)}
           className="w-full pl-3 pr-8 py-1.5 text-sm outline-none rounded-md"
         />
-        <button type="submit" className="absolute right-1 top-1.5 text-gray-900">
+        <button
+          type="submit"
+          className="absolute right-1 top-1.5 text-gray-900"
+          aria-label="Search"
+        >
           <Search className="w-4 h-4 cursor-pointer" />
         </button>
       </form>
@@ -101,14 +115,17 @@ const SearchBox: React.FC<SearchBoxProps> = ({ className = "" }) => {
         <ul className="absolute z-10 bg-white border rounded mt-1 w-full max-h-48 overflow-y-auto shadow text-sm">
           {suggestions.map((item) => (
             <li
-              key={item.id}
+              key={item._id}
               className="flex items-center gap-2 px-3 py-2 hover:bg-blue-100 cursor-pointer"
-              onClick={() => {
-                router.push(`/products/${item.id}`);
-                setSuggestions([]);
-              }}
+              onClick={() => handleSelectSuggestion(item._id, item.name)}
             >
-              <Image src={item.image} alt={item.name} width={40} height={35} className=" rounded object-cover" />
+              <Image
+                src={item.images[0]}
+                alt={item.name}
+                width={40}
+                height={35}
+                className="rounded object-cover"
+              />
               <span>{item.name}</span>
             </li>
           ))}

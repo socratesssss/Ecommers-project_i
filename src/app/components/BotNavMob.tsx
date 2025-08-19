@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { House, Search, ShoppingCart,Truck } from "lucide-react";
+import { House, Search, ShoppingCart, Truck } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,9 +11,11 @@ import SearchBox from "./SearchBox";
 const BotNavMob = () => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
   const [showSearch, setShowSearch] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
+  // Close search overlay when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -30,27 +32,28 @@ const BotNavMob = () => {
     };
   }, [showSearch]);
 
-  // Function to close search on search completion
-  const handleSearchComplete = () => {
-    setShowSearch(false);
-  };
+
 
   return (
     <>
+      {/* Bottom navigation */}
       <div className="md:hidden pt-20">
         <div className="fixed bottom-0 z-50 w-full bg-gray-100 border-t">
-          <ul className="grid grid-cols-4 py-2 justify-center text-gray-800 font-medium">
+          <ul className="grid grid-cols-4 py-2 text-gray-800 font-medium">
             {/* Orders */}
             <li className="flex justify-center items-center">
-              <Link href="/orders" className="flex justify-center items-center flex-col">
-<Truck />
+              <Link href="/orders" className="flex flex-col items-center">
+                <Truck />
                 <p className="text-[10px]">Orders</p>
               </Link>
             </li>
 
             {/* Search */}
             <li className="flex justify-center items-center">
-              <button onClick={() => setShowSearch((prev) => !prev)} aria-label="Open Search">
+              <button
+                onClick={() => setShowSearch((prev) => !prev)}
+                aria-label="Open Search"
+              >
                 <Search />
               </button>
             </li>
@@ -63,7 +66,7 @@ const BotNavMob = () => {
             </li>
 
             {/* Cart */}
-            <li className="flex justify-center items-center ">
+            <li className="flex justify-center items-center">
               <Link href="/all-carts" className="relative" aria-label="Cart">
                 <ShoppingCart className="w-5 h-5 text-gray-800 hover:text-black" />
                 <AnimatePresence>
@@ -86,24 +89,35 @@ const BotNavMob = () => {
         </div>
       </div>
 
-      {/* Search Overlay */}
-      {showSearch && (
-        <div className="fixed inset-0 z-40 flex justify-center items-start  bg-gray-900/45">
-          <div
-            ref={searchRef}
-            className="bg-white p-4 rounded-md shadow-lg w-full max-w-md relative z-50"
+      {/* Search overlay */}
+      <AnimatePresence>
+        {showSearch && (
+          <motion.div
+            className="fixed inset-0 z-40 flex justify-center items-start bg-gray-900/45"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-            <SearchBox onSearchComplete={handleSearchComplete} />
-            <button
-              onClick={() => setShowSearch(false)}
-              className="absolute top-5 right-5 text-gray-600 hover:text-gray-900"
-              aria-label="Close Search"
+            <motion.div
+              ref={searchRef}
+              className="bg-white p-4 rounded-md shadow-lg w-full max-w-md relative z-50"
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -50, opacity: 0 }}
             >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+              
+                 <SearchBox onSearch={(query) => console.log("User searched:", query)} />
+              <button
+                onClick={() => setShowSearch(false)}
+                className="absolute top-5 right-5 text-gray-600 hover:text-gray-900"
+                aria-label="Close Search"
+              >
+                ✕
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

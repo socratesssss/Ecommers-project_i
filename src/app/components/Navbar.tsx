@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import {  usePathname } from 'next/navigation';
 import { Menu, X, ShoppingCart } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
@@ -11,7 +11,7 @@ import CartModel from './CartModel';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
-  const router = useRouter();
+
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -19,11 +19,6 @@ export default function Navbar() {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  const handleSearch = (query: string) => {
-    if (query.trim()) {
-      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-    }
-  };
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -75,7 +70,8 @@ export default function Navbar() {
 
         {/* Desktop search + cart */}
         <div className="hidden md:flex items-center space-x-6">
-          <SearchBox onSearch={handleSearch} />
+         <SearchBox onSearch={(query) => console.log("User searched:", query)} />
+
           <div className="relative">
             <AnimatePresence>
               <button aria-label="Cart" onClick={() => setIsCartOpen(prev => !prev)}>

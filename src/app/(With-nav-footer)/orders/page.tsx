@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
 
 type OrderItem = {
   image: string;
@@ -9,30 +9,26 @@ type OrderItem = {
   quantity: number;
   total: number;
 };
-type ApiOrder = {
-  _id: string;
-  orderDate: string;
-  products: OrderItem[];
-  deliveryCost: number;
-  total: number;
-  pending?: boolean;
-};
+
 type Order = {
   orderId: string;
   orderDate: string;
   products: OrderItem[];
   deliveryCost: number;
   total: number;
-  status: 'pending' | 'delivered' | 'canceled';
+  status: "pending" | "delivered" | "canceled";
 };
 
 const OrderSkeleton = () => {
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-8">
       <div className="h-8 w-48 bg-gray-200 rounded mb-6 mx-auto animate-pulse"></div>
-      
+
       {[...Array(3)].map((_, index) => (
-        <div key={index} className="bg-white border border-gray-200 shadow-sm rounded-md p-4 space-y-4 animate-pulse">
+        <div
+          key={index}
+          className="bg-white border border-gray-200 shadow-sm rounded-md p-4 space-y-4 animate-pulse"
+        >
           {/* Order Header Skeleton */}
           <div className="flex items-center justify-between">
             <div>
@@ -70,55 +66,62 @@ const OrderSkeleton = () => {
 const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+  // ✅ Load from localStorage (or fallback demo data)
   useEffect(() => {
-    async function fetchOrders() {
-      try {
-        const res = await fetch(`${port}/api/order`);
-        if (!res.ok) throw new Error('Failed to fetch orders');
-        const data = await res.json();
+    const savedOrders = localStorage.getItem("orders");
 
-        if (!Array.isArray(data.orders)) {
-          setOrders([]);
-          return;
-        }
+    if (savedOrders) {
+      setOrders(JSON.parse(savedOrders));
+    } else {
+      // fallback demo data
+      const demoOrders: Order[] = [
+        {
+          orderId: "1",
+          orderDate: new Date().toISOString(),
+          products: [
+            {
+              image: "/demo/product1.jpg",
+              name: "Product One",
+              quantity: 2,
+              total: 40,
+            },
+            {
+              image: "/demo/product2.jpg",
+              name: "Product Two",
+              quantity: 1,
+              total: 25,
+            },
+          ],
+          deliveryCost: 5,
+          total: 70,
+          status: "delivered",
+        },
+        {
+          orderId: "2",
+          orderDate: new Date().toISOString(),
+          products: [
+            {
+              image: "/demo/product3.jpg",
+              name: "Product Three",
+              quantity: 1,
+              total: 60,
+            },
+          ],
+          deliveryCost: 0,
+          total: 60,
+          status: "pending",
+        },
+      ];
 
-        const normalizedOrders: Order[] = data.orders.map((order: ApiOrder) => {
-          let status: 'pending' | 'delivered' | 'canceled' = 'canceled';
-          if (order.products && order.products.length > 0) {
-            status = order.pending === false ? 'delivered' : 'pending';
-          }
-
-          return {
-            orderId: order._id,
-            orderDate: order.orderDate,
-            products: order.products || [],
-            deliveryCost: order.deliveryCost || 0,
-            total: order.total || 0,
-            status,
-          };
-        });
-
-        const sortedOrders = normalizedOrders.sort(
-          (a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
-        );
-
-        setOrders(sortedOrders);
-      } catch (err) {
-        console.error(err);
-        setOrders([]);
-      } finally {
-        setLoading(false);
-      }
+      setOrders(demoOrders);
+      localStorage.setItem("orders", JSON.stringify(demoOrders));
     }
 
-    fetchOrders();
-  }, [ port]);
+    setLoading(false);
+  }, []);
 
-  if (loading) {
-    return <OrderSkeleton />;
-  }
+  if (loading) return <OrderSkeleton />;
 
   if (orders.length === 0) {
     return <p className="text-center py-10">No orders found.</p>;
@@ -137,12 +140,12 @@ const OrdersPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">
-                {new Date(order.orderDate).toLocaleString('en-US', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                  hour: 'numeric',
-                  minute: '2-digit',
+                {new Date(order.orderDate).toLocaleString("en-US", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
                   hour12: true,
                 })}
               </p>
@@ -150,18 +153,18 @@ const OrdersPage = () => {
 
             <span
               className={`px-3 py-1 text-sm rounded-full font-semibold ${
-                order.status === 'delivered'
-                  ? 'bg-green-100 text-green-700'
-                  : order.status === 'pending'
-                  ? 'bg-yellow-100 text-yellow-700'
-                  : 'bg-red-100 text-red-700'
+                order.status === "delivered"
+                  ? "bg-green-100 text-green-700"
+                  : order.status === "pending"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-red-100 text-red-700"
               }`}
             >
-              {order.status === 'delivered'
-                ? 'Delivered'
-                : order.status === 'pending'
-                ? 'Pending'
-                : 'Canceled'}
+              {order.status === "delivered"
+                ? "Delivered"
+                : order.status === "pending"
+                ? "Pending"
+                : "Canceled"}
             </span>
           </div>
 

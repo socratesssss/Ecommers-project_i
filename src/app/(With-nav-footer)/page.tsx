@@ -1,29 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useMemo } from "react";
 import ProductCard from "../components/Card";
 import Banner from "../components/Banner";
 import ProductFilter from "../components/categoryfilterring";
 import Pagination from "../components/Pagination";
-import { getVisitorId } from "@/utils/fingerprint";
+import { useRouter } from 'next/navigation';
+import { localProducts } from "@/data/product";
 
-type ProductColor = {
-  color: string;
-  images: string[];
-};
 
-type Product = {
-  _id: string;
-  name: string;
-  price: number;
-  discountPrice?: number;
-  category: "Vape" | "Juice" | "Pods"|"Kits";
-  images: string[];
-  inStock: boolean;
-  miniDescription: string;
-  description?: string;
-  productColors?: ProductColor[];
-};
+
+
+
 
 type Filters = {
   categories: string[];
@@ -32,32 +20,13 @@ type Filters = {
   sortOrder: "lowToHigh" | "highToLow" | "";
 };
 
-const ProductCardSkeleton = () => {
-  
-  return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden p-2 animate-pulse">
-      {/* Image placeholder */}
-      <div className="w-full aspect-[4/3] bg-gray-200 rounded-lg"></div>
-      
-      {/* Content placeholder */}
-      <div className="py-2 mt-2 space-y-2">
-        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-        <div className="h-8 bg-gray-200 rounded-full mt-2"></div>
-      </div>
-    </div>
-  );
-};
+
+
+
 
 const HomePage = () => {
-  const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
-  console.log("Backend URL:", port);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
-  const searchTerm = '';
   const [filters, setFilters] = useState<Filters>({
     categories: [],
     minPrice: 0,
@@ -65,92 +34,55 @@ const HomePage = () => {
     sortOrder: "",
   });
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filters]);
+  const { displayedProducts, totalPages } = useMemo(() => {
+    let filtered = [...localProducts];
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      const query = new URLSearchParams();
-
-      query.append("page", currentPage.toString());
-      query.append("limit", itemsPerPage.toString());
-
-      if (filters.categories.length > 0) {
-        query.append("categories", filters.categories.join(","));
-      }
-      query.append("minPrice", filters.minPrice.toString());
-      query.append("maxPrice", filters.maxPrice.toString());
-      query.append("sortOrder", filters.sortOrder);
-
-      if (searchTerm.trim()) {
-        query.append("q", searchTerm.trim());
-      }
-
-      try {
-        const res = await fetch(`${port}/api/product?${query.toString()}`);
-        const data = await res.json();
-
-        setProducts(data.products || []);
-        setTotalPages(data.totalPages || 1);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [currentPage, filters, searchTerm, port]);
-
-  // tracki
-useEffect(() => {
-  let mounted = true;
-
-  (async () => {
-    try {
-      const visitorId = await getVisitorId();
-
-      // Prevent double tracking during React StrictMode / dev duplicates
-      if (!mounted) return;
-
-      await fetch(`${port}/api/visit/track`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ visitorId }),
-        keepalive: true // optionally helpful for navigation cases
-      });
-    } catch (err) {
-      console.error('Failed to track visit', err);
+    // Apply filters
+    if (filters.categories.length > 0) {
+      filtered = filtered.filter(product => 
+        filters.categories.includes(product.category)
+      );
     }
-  })();
 
-  return () => { mounted = false; };
-}, []);
+    filtered = filtered.filter(product => 
+      product.price >= filters.minPrice && 
+      product.price <= filters.maxPrice
+    );
 
+    // Apply sorting
+    if (filters.sortOrder === "lowToHigh") {
+      filtered.sort((a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
+    } else if (filters.sortOrder === "highToLow") {
+      filtered.sort((a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
+    }
 
+    // Calculate pagination
+    const totalItems = filtered.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const displayedProducts = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+    return { displayedProducts, totalPages };
+  }, [currentPage, filters, itemsPerPage]);
+const router = useRouter();
   return (
     <div>
       <Banner />
       <ProductFilter onFilterChange={setFilters} />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 mx-auto px-4 md:px-6 py-10 container gap-3">
-        {loading ? (
-          Array.from({ length: itemsPerPage }).map((_, index) => (
-            <ProductCardSkeleton key={index} />
-          ))
-        ) : products.length > 0 ? (
-          products.map((item) => (
-            <ProductCard
-              key={item._id}
-              id={item._id}
-              images={item.images}
-              name={item.name}
-              inStock={item.inStock}
-              discountPrice={item.discountPrice}
-              price={item.price}
-            />
+        {displayedProducts.length > 0 ? (
+          displayedProducts.map((item) => (
+         <ProductCard
+  key={item._id}
+  id={item._id}
+  images={item.images}
+  name={item.name}
+  inStock={item.inStock}
+  discountPrice={item.discountPrice}
+  price={item.price}
+  onClick={() => router.push(`/products/${item._id}`)} // navigate to dynamic page
+/>
           ))
         ) : (
           <p className="text-center col-span-full text-gray-500">
@@ -159,7 +91,7 @@ useEffect(() => {
         )}
       </div>
 
-      {!loading && totalPages > 1 && (
+      {totalPages > 1 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

@@ -1,56 +1,37 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 
-
 type Banner = {
-  _id: string;
   imageUrl: string;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
 };
 
+const LOCAL_BANNERS: Banner[] = [
+  { imageUrl: "/placeholderimage.webp" },
+  { imageUrl: "/placeholderimage.webp" },
+  { imageUrl: "/placeholderimage.webp" },
+];
+
 export default function Banner() {
-   const port  = process.env.NEXT_PUBLIC_API_BASE_URL;
-  // banners is an array of strings (URLs)
-  const [banners, setBanners] = useState<Banner[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
   useEffect(() => {
-    // Fetch banners from API on mount
-    const fetchBanners = async () => {
-      try {
-        const res = await fetch(`${port}/api/banners`);
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data: Banner[] = await res.json();
-        setBanners(data);
-      } catch (error) {
-        console.error('Failed to fetch banners:', error);
-      }
-    };
-    fetchBanners();
-  }, [ port]);
+    if (LOCAL_BANNERS.length === 0) return;
 
-  useEffect(() => {
-    // Auto-slide every 5 seconds if banners loaded
-    if (banners.length === 0) return;
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) =>
-        prevIndex === banners.length - 1 ? 0 : prevIndex + 1
+        prevIndex === LOCAL_BANNERS.length - 1 ? 0 : prevIndex + 1
       );
     }, 5000);
+
     return () => clearInterval(interval);
-  }, [banners]);
+  }, []);
 
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-  };
+  const goToSlide = (index: number) => setCurrentIndex(index);
 
-  // Swipe handlers for mobile
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -61,44 +42,34 @@ export default function Banner() {
 
     if (deltaX > 50) {
       setCurrentIndex((prev) =>
-        prev === banners.length - 1 ? 0 : prev + 1
+        prev === LOCAL_BANNERS.length - 1 ? 0 : prev + 1
       );
     } else if (deltaX < -50) {
       setCurrentIndex((prev) =>
-        prev === 0 ? banners.length - 1 : prev - 1
+        prev === 0 ? LOCAL_BANNERS.length - 1 : prev - 1
       );
     }
   };
 
-  if (banners.length === 0) {
-    return (
-      // <div className="text-center p-6 text-gray-500" role="status" aria-live="polite">
-      //   Loading banners...
-      // </div>
-      ''
-    );
-  }
-
   return (
     <section className="relative w-full mx-auto overflow-hidden" aria-label="Banner Carousel">
-      {/* Slider container */}
       <div
         className="flex transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {banners.map((src, idx) => (
+        {LOCAL_BANNERS.map((banner, idx) => (
           <div
             key={idx}
-            className="   relative  w-full flex-shrink-0 h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px]"
+            className="relative w-full flex-shrink-0 h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px]"
             aria-hidden={currentIndex !== idx}
           >
             <Image
-              src={src.imageUrl}
+              src={banner.imageUrl}
               alt={`Banner slide ${idx + 1}`}
               fill
-              className="w-full h-full  object-cover relative z-10"
+              className="w-full h-full object-cover"
               sizes="100vw"
               priority={idx === 0}
               quality={80}
@@ -112,7 +83,7 @@ export default function Banner() {
         className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2"
         aria-label="Select banner slide"
       >
-        {banners.map((_, idx) => (
+        {LOCAL_BANNERS.map((_, idx) => (
           <button
             key={idx}
             onClick={() => goToSlide(idx)}
