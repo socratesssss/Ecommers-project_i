@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { localProducts } from "@/data/product";
+import { localProducts } from "../../data/product";
 
 type ProductColor = {
   color: string;

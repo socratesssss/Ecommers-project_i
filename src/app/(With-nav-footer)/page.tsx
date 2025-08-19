@@ -6,7 +6,7 @@ import Banner from "../components/Banner";
 import ProductFilter from "../components/categoryfilterring";
 import Pagination from "../components/Pagination";
 import { useRouter } from 'next/navigation';
-import { localProducts } from "@/data/product";
+import { localProducts } from "../../data/product";
 
 
 

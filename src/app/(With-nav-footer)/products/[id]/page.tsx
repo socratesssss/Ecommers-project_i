@@ -6,7 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '@/redux/cartSlice';
 import ProductPageSkeleton from './skeletn';
-import { localProducts } from '@/data/product';
+import { localProducts } from '../../../../data/product';
 type ProductColor = {
   color: string;
   images: string[];

@@ -14,7 +14,7 @@ import {
   FiCreditCard,
   FiAlertCircle,
 } from "react-icons/fi";
-import { localProducts } from "@/data/product";
+import { localProducts } from "../../data/product";
 
 
 
