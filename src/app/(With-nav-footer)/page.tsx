@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import ProductCard from "../components/Card";
+// import ProductCard from "../components/Card";
 import Banner from "../components/Banner";
 import ProductFilter from "../components/categoryfilterring";
 import Pagination from "../components/Pagination";
@@ -73,16 +73,18 @@ const router = useRouter();
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 mx-auto px-4 md:px-6 py-10 container gap-3">
         {displayedProducts.length > 0 ? (
           displayedProducts.map((item) => (
-         <ProductCard
-  key={item._id}
-  id={item._id}
-  images={item.images}
-  name={item.name}
-  inStock={item.inStock}
-  discountPrice={item.discountPrice}
-  price={item.price}
-  onClick={() => router.push(`/products/${item._id}`)} // navigate to dynamic page
-/>
+//          <ProductCard
+//   key={item._id}
+//   id={item._id}
+//   images={item.images}
+//   name={item.name}
+//   inStock={item.inStock}
+//   discountPrice={item.discountPrice}
+//   price={item.price}
+//   onClick={() => router.push(`/products/${item._id}`)} // navigate to dynamic page
+// />
+<>
+</>
           ))
         ) : (
           <p className="text-center col-span-full text-gray-500">
