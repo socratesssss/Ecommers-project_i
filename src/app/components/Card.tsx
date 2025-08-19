@@ -82,14 +82,7 @@ export default function ProductCard({
               className="object-cover transition-opacity duration-500 group-hover:opacity-0"
             />
           )}
-          {images[1] && (
-            <Image
-              src={images[1]}
-              alt={`${name} hover`}
-              fill
-              className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-            />
-          )}
+       
         </div>
       ) : (
         <Link href={`/products/${id}`}>
@@ -102,14 +95,7 @@ export default function ProductCard({
                 className="object-cover transition-opacity duration-500 group-hover:opacity-0"
               />
             )}
-            {images[1] && (
-              <Image
-                src={images[1]}
-                alt={`${name} hover`}
-                fill
-                className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-              />
-            )}
+         
           </div>
         </Link>
       )}
