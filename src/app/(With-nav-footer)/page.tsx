@@ -26,7 +26,7 @@ type Filters = {
 
 const HomePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
+  const itemsPerPage = 15;
   const [filters, setFilters] = useState<Filters>({
     categories: [],
     minPrice: 0,

@@ -15,7 +15,7 @@ type FilterProps = {
 
 const ProductFilter = ({ onFilterChange }: FilterProps) => {
   // Define categories locally
-  const localCategories = ['All', 'Electronics', 'Clothing', 'Home', 'Beauty', 'Sports'];
+  const localCategories = ['All',  'IPhone',  'Samsung', 'Pixel'];
   
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['All']);
   const [minPrice, setMinPrice] = useState('');

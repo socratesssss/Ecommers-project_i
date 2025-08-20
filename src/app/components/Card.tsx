@@ -15,7 +15,7 @@ type ProductCardProps = {
   discountPrice?: number;
   inStock: boolean;
   productColors?: { color: string; images: string[] }[];
-  onClick?: () => void; // ✅ Added optional onClick
+  onClick?: () => void;
 };
 
 export default function ProductCard({
@@ -26,12 +26,19 @@ export default function ProductCard({
   discountPrice,
   inStock,
   productColors = [],
-  onClick, // ✅ destructure it
+  onClick,
 }: ProductCardProps) {
   const dispatch = useDispatch();
   const [animate, setAnimate] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const selectedColor = productColors[0] || null;
+
+  // Determine which images to use (color-specific or main images)
+  const displayImages = selectedColor?.images?.length > 0 ? selectedColor.images : images;
+  
+  // Get the second image for hover, fallback to first image if only one exists
+  const hoverImage = displayImages.length > 1 ? displayImages[1] : displayImages[0];
 
   const handleAdd = () => {
     dispatch(addToCart({
@@ -62,7 +69,9 @@ export default function ProductCard({
   return (
     <div
       className="relative bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition duration-300 p-2"
-      onClick={onClick} // ✅ allows programmatic navigation
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {animate && (
         <div className="absolute top-3 right-3 z-50 bg-white rounded-4xl px-2 py-1 text-green-500 animate-bounce flex items-center gap-1">
@@ -71,34 +80,64 @@ export default function ProductCard({
         </div>
       )}
 
-      {/* ✅ If no onClick passed, fallback to Link */}
-      {onClick ? (
-        <div className="relative w-full aspect-[4/3] group cursor-pointer">
-          {images[0] && (
-            <Image
-              src={images[0]}
-              alt={name}
-              fill
-              className="object-cover transition-opacity duration-500 group-hover:opacity-0"
-            />
-          )}
-       
-        </div>
-      ) : (
-        <Link href={`/products/${id}`}>
-          <div className="relative w-full aspect-[4/3] group">
-            {images[0] && (
+      {/* Image container */}
+      <div className="relative w-full aspect-[4/3] overflow-hidden">
+        {onClick ? (
+          <div className="w-full h-full cursor-pointer">
+            {/* First image */}
+            {displayImages[0] && (
               <Image
-                src={images[0]}
+                src={displayImages[0]}
                 alt={name}
                 fill
-                className="object-cover transition-opacity duration-500 group-hover:opacity-0"
+                className={`object-cover transition-opacity duration-500 ${
+                  isHovered && hoverImage !== displayImages[0] ? "opacity-0" : "opacity-100"
+                }`}
               />
             )}
-         
+            
+            {/* Second image on hover */}
+            {hoverImage && hoverImage !== displayImages[0] && (
+              <Image
+                src={hoverImage}
+                alt={name}
+                fill
+                className={`object-cover transition-opacity duration-500 ${
+                  isHovered ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            )}
           </div>
-        </Link>
-      )}
+        ) : (
+          <Link href={`/products/${id}`}>
+            <div className="w-full h-full">
+              {/* First image */}
+              {displayImages[0] && (
+                <Image
+                  src={displayImages[0]}
+                  alt={name}
+                  fill
+                  className={`object-cover transition-opacity duration-500 ${
+                    isHovered && hoverImage !== displayImages[0] ? "opacity-0" : "opacity-100"
+                  }`}
+                />
+              )}
+              
+              {/* Second image on hover */}
+              {hoverImage && hoverImage !== displayImages[0] && (
+                <Image
+                  src={hoverImage}
+                  alt={name}
+                  fill
+                  className={`object-cover transition-opacity duration-500 ${
+                    isHovered ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              )}
+            </div>
+          </Link>
+        )}
+      </div>
 
       <div className="sm:py-2 mt-2 flex flex-col">
         <h3 className="sm:text-sm text-xs font-semibold text-gray-800 line-clamp-2">
@@ -125,7 +164,7 @@ export default function ProductCard({
 
         <button
           onClick={(e) => {
-            e.stopPropagation(); // ✅ prevent firing parent onClick
+            e.stopPropagation();
             handleAdd();
           }}
           disabled={!inStock}

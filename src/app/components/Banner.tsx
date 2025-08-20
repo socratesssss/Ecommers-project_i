@@ -8,9 +8,10 @@ type Banner = {
 };
 
 const LOCAL_BANNERS: Banner[] = [
-  { imageUrl: "/placeholderimage.webp" },
-  { imageUrl: "/placeholderimage.webp" },
-  { imageUrl: "/placeholderimage.webp" },
+  { imageUrl: "/banner1.jpg" },
+  { imageUrl: "/banner2.jpg" },
+  { imageUrl: "/banner3.jpg" },
+ 
 ];
 
 export default function Banner() {
