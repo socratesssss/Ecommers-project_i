@@ -909,7 +909,7 @@ description:`<h1>Apple iPhone 14</h1>
   },
   {
     _id: "10",
-    name: "Classic White T-Shirt",
+    name: "Google Pixel 9",
     description: `<h1>Google Pixel 9</h1>
 <p>
   Experience cutting-edge performance, intelligent AI features, and stunning photography with the Google Pixel 9. Designed to keep you productive, capture amazing moments, and perform seamlessly all day, the Pixel 9 combines powerful hardware with Google’s latest software innovations for a smart, effortless experience.
@@ -1000,7 +1000,7 @@ description:`<h1>Apple iPhone 14</h1>
   },
   {
     _id: "11",
-    name: "Classic White T-Shirt",
+    name: "Pixel 7pro",
     description: "A premium quality cotton t-shirt perfect for everyday wear. Made from 100% organic cotton with a comfortable fit and durable construction.",
     miniDescription: "Comfortable cotton t-shirt",
     price: 1111.11,

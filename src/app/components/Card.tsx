@@ -16,6 +16,7 @@ type ProductCardProps = {
   inStock: boolean;
   productColors?: { color: string; images: string[] }[];
   onClick?: () => void;
+  firstImageOnly?: boolean; // New prop to control image loading
 };
 
 export default function ProductCard({
@@ -27,6 +28,7 @@ export default function ProductCard({
   inStock,
   productColors = [],
   onClick,
+  firstImageOnly = false, // Default to false for backward compatibility
 }: ProductCardProps) {
   const dispatch = useDispatch();
   const [animate, setAnimate] = useState(false);
@@ -37,8 +39,11 @@ export default function ProductCard({
   // Determine which images to use (color-specific or main images)
   const displayImages = selectedColor?.images?.length > 0 ? selectedColor.images : images;
   
-  // Get the second image for hover, fallback to first image if only one exists
-  const hoverImage = displayImages.length > 1 ? displayImages[1] : displayImages[0];
+  // Get the first image for initial render
+  const firstImage = displayImages[0] || '/placeholder.jpg';
+  
+  // Get the second image for hover if needed
+  const hoverImage = displayImages.length > 1 ? displayImages[1] : firstImage;
 
   const handleAdd = () => {
     dispatch(addToCart({
@@ -46,7 +51,7 @@ export default function ProductCard({
       productName: { original: name },
       price: { amount: discountPrice || price },
       quantity: 1,
-      imageUrl: selectedColor?.images?.[0] || images?.[0] || '/placeholder.jpg',
+      imageUrl: firstImage,
       inStock,
       selectedColor: selectedColor?.color || null,
       allColors: productColors || [],
@@ -84,20 +89,17 @@ export default function ProductCard({
       <div className="relative w-full aspect-[4/3] overflow-hidden">
         {onClick ? (
           <div className="w-full h-full cursor-pointer">
-            {/* First image */}
-            {displayImages[0] && (
-              <Image
-                src={displayImages[0]}
-                alt={name}
-                fill
-                className={`object-cover transition-opacity duration-500 ${
-                  isHovered && hoverImage !== displayImages[0] ? "opacity-0" : "opacity-100"
-                }`}
-              />
-            )}
+            {/* First image - always shown */}
+            <Image
+              src={firstImage}
+              alt={name}
+              fill
+              className="object-cover"
+              priority={true} // Load with priority for better LCP
+            />
             
-            {/* Second image on hover */}
-            {hoverImage && hoverImage !== displayImages[0] && (
+            {/* Second image on hover - only if not using firstImageOnly */}
+            {!firstImageOnly && hoverImage !== firstImage && (
               <Image
                 src={hoverImage}
                 alt={name}
@@ -111,20 +113,17 @@ export default function ProductCard({
         ) : (
           <Link href={`/products/${id}`}>
             <div className="w-full h-full">
-              {/* First image */}
-              {displayImages[0] && (
-                <Image
-                  src={displayImages[0]}
-                  alt={name}
-                  fill
-                  className={`object-cover transition-opacity duration-500 ${
-                    isHovered && hoverImage !== displayImages[0] ? "opacity-0" : "opacity-100"
-                  }`}
-                />
-              )}
+              {/* First image - always shown */}
+              <Image
+                src={firstImage}
+                alt={name}
+                fill
+                className="object-cover"
+                priority={true}
+              />
               
-              {/* Second image on hover */}
-              {hoverImage && hoverImage !== displayImages[0] && (
+              {/* Second image on hover - only if not using firstImageOnly */}
+              {!firstImageOnly && hoverImage !== firstImage && (
                 <Image
                   src={hoverImage}
                   alt={name}
