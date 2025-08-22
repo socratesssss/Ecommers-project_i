@@ -6,7 +6,6 @@ import { ChevronLeft, ChevronRight, ShoppingCart, Check } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '@/redux/cartSlice';
-import ProductPageSkeleton from './skeletn';
 import { localProducts } from '../../../../data/product';
 type ProductColor = {
   color: string;
@@ -132,7 +131,7 @@ const ProductPage = () => {
     scrollToIndex(0);
   };
 
-  if (loading) return <ProductPageSkeleton />;
+ 
   if (!product)
     return (
       <div className="min-h-screen flex items-center justify-center">

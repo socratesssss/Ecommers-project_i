@@ -6,7 +6,7 @@ import { Minus, Plus, Check, X } from "lucide-react";
 import Link from "next/link";
 import AddressForm from "../components/Delibary";
 import { AddressFormHandle, DeliveryDetails } from "../components/Delibary";
-import OrderNowPageSkeleton from "./skeleton";
+
 import { USStates } from "../../data/AddressData";
 
 type ProductColor = {
@@ -151,7 +151,7 @@ const OrderNowPage = () => {
     setLoading(false);
   };
 
-  if (isLoading) return <OrderNowPageSkeleton />;
+
 
   if (!product)
     return (
