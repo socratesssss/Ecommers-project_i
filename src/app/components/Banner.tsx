@@ -8,9 +8,9 @@ type Banner = {
 };
 
 const LOCAL_BANNERS: Banner[] = [
-  { imageUrl: "/banner1.jpg" },
-  { imageUrl: "/banner2.jpg" },
-  { imageUrl: "/banner3.jpg" },
+  { imageUrl: "https://res.cloudinary.com/dohqshaup/image/upload/v1755870030/banner1_h2uolk.jpg" },
+  { imageUrl: "https://res.cloudinary.com/dohqshaup/image/upload/v1755870083/banner2_eyc7rj.jpg" },
+  { imageUrl: "https://res.cloudinary.com/dohqshaup/image/upload/v1755870093/banner3_rwhnzi.jpg" },
  
 ];
 
