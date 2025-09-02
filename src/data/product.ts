@@ -111,7 +111,7 @@ description:`<h1>Apple iPhone 14</h1>
     discountPrice:999.99 ,
     category: "IPhone",
     inStock: true,
-    images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870184/IPhone14_ryp4yf.jpg"],
+    images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870184/IPhone14_ryp4yf.jpg"],
   
   },
   {
@@ -213,18 +213,18 @@ description:`<h1>Apple iPhone 14</h1>
        productColors: [
       {
         color: "White",
-        images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870231/iphone16c1_ssl3hz.jpg"]
+        images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870231/iphone16c1_ssl3hz.jpg"]
       },
       {
         color: "Black",
-        images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870240/iphone16c2_e3kchn.jpg"]
+        images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870240/iphone16c2_e3kchn.jpg"]
       },
       {
         color: "Black",
-        images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870238/iphone16c3_p6xhvh.jpg"]
+        images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870238/iphone16c3_p6xhvh.jpg"]
       },
     ],
-    images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870238/iphone16c3_p6xhvh.jpg","https://res.cloudinary.com/dohqshaup/image/upload/v1755870228/iphone16_u3pu6t.jpg",],
+    images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870238/iphone16c3_p6xhvh.jpg","https://res.cloudinary.com/dohqshaup/image/upload/v1755870228/iphone16_u3pu6t.jpg",],
  
   },
   {
@@ -323,11 +323,11 @@ description:`<h1>Apple iPhone 14</h1>
     discountPrice:999.99 ,
     category: "IPhone",
     inStock: true,
-    images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870243/iphone16pro_vlilbv.jpg"],
+    images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870243/iphone16pro_vlilbv.jpg"],
     productColors: [
       {
         color: "White",
-        images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870253/iphone16proc1_ybhs09.jpg"]
+        images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870253/iphone16proc1_ybhs09.jpg"]
       },
    
     ]
@@ -426,7 +426,7 @@ description:`<h1>Apple iPhone 14</h1>
     discountPrice:999.99 ,
     category: "IPhone",
     inStock: false,
-    images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870191/iphone15_su4jln.jpg"],
+    images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870191/iphone15_su4jln.jpg"],
 
   },
   {
@@ -522,15 +522,15 @@ description:`<h1>Apple iPhone 14</h1>
     discountPrice:999.99 ,
     category: "IPhone",
     inStock: true,
-    images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870199/iphone15pro_tk1tr2.jpg"],
+    images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870199/iphone15pro_tk1tr2.jpg"],
     productColors: [
       {
         color: "Black",
-        images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870208/iphone15proc1_wuh9lg.jpg"]
+        images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870208/iphone15proc1_wuh9lg.jpg"]
       },
       {
         color: "Silver",
-        images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870218/iphone15proc2_tnmfnv.jpg"]
+        images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870218/iphone15proc2_tnmfnv.jpg"]
       }
     ]
   },
@@ -621,15 +621,15 @@ description:`<h1>Apple iPhone 14</h1>
     discountPrice:999.99 ,
     category: "Samsung",
     inStock: true,
-    images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870772/SamsungS24_rksmu9.jpg"],
+    images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870772/SamsungS24_rksmu9.jpg"],
     productColors: [
       {
         color: "White",
-        images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870836/SamsungS24c1_yywdt7.jpg"]
+        images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870836/SamsungS24c1_yywdt7.jpg"]
       },
       {
         color: "White",
-        images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870840/SamsungS24.jpgc2_vo7mcc.jpg"]
+        images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870840/SamsungS24.jpgc2_vo7mcc.jpg"]
       }
     ]
   },
@@ -721,11 +721,11 @@ description:`<h1>Apple iPhone 14</h1>
     discountPrice:999.99 ,
     category: "Samsung",
     inStock: true,
-    images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870272/SamsungGalaxyNote20Ultra_b7rx8u.jpg"],
+    images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870272/SamsungGalaxyNote20Ultra_b7rx8u.jpg"],
     productColors: [
       {
         color: "White",
-        images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870282/SamsungGalaxyNote20Ultrac1_i3bibj.jpg"]
+        images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870282/SamsungGalaxyNote20Ultrac1_i3bibj.jpg"]
       }
     ]
   },
@@ -816,7 +816,7 @@ description:`<h1>Apple iPhone 14</h1>
     discountPrice:999.99 ,
     category: "Samsung",
     inStock: true,
-    images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870290/SamsungGalaxyZFlip_i9easb.jpg"],
+    images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870290/SamsungGalaxyZFlip_i9easb.jpg"],
  
   },
   {
@@ -905,7 +905,7 @@ description:`<h1>Apple iPhone 14</h1>
     discountPrice:999.99 ,
     category: "Pixel",
     inStock: true,
-    images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870258/pixel6_omjbwo.jpg"],
+    images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870258/pixel6_omjbwo.jpg"],
   },
   {
     _id: "10",
@@ -995,7 +995,7 @@ description:`<h1>Apple iPhone 14</h1>
     discountPrice:999.99 ,
     category: "Pixel",
     inStock: true,
-    images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870276/pixel9_wuvitr.jpg"],
+    images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870276/pixel9_wuvitr.jpg"],
  
   },
   {
@@ -1007,7 +1007,7 @@ description:`<h1>Apple iPhone 14</h1>
     discountPrice:999.99 ,
     category: "Pixel",
     inStock: true,
-    images: ["https://res.cloudinary.com/dohqshaup/image/upload/v1755870262/pixel7pro_easucn.jpg"],
+    images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870262/pixel7pro_easucn.jpg"],
     productColors: [
       {
         color: "White",
