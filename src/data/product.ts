@@ -212,11 +212,11 @@ description:`<h1>Apple iPhone 14</h1>
     inStock: true,
        productColors: [
       {
-        color: "White",
+        color: "Whited",
         images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870231/iphone16c1_ssl3hz.jpg"]
       },
       {
-        color: "Black",
+        color: "Black4",
         images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870240/iphone16c2_e3kchn.jpg"]
       },
       {
@@ -326,7 +326,7 @@ description:`<h1>Apple iPhone 14</h1>
     images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870243/iphone16pro_vlilbv.jpg"],
     productColors: [
       {
-        color: "White",
+        color: "Whited",
         images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870253/iphone16proc1_ybhs09.jpg"]
       },
    
@@ -525,11 +525,11 @@ description:`<h1>Apple iPhone 14</h1>
     images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870199/iphone15pro_tk1tr2.jpg"],
     productColors: [
       {
-        color: "Black",
+        color: "Blackf",
         images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870208/iphone15proc1_wuh9lg.jpg"]
       },
       {
-        color: "Silver",
+        color: "Silverd",
         images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870218/iphone15proc2_tnmfnv.jpg"]
       }
     ]
@@ -624,11 +624,11 @@ description:`<h1>Apple iPhone 14</h1>
     images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870772/SamsungS24_rksmu9.jpg"],
     productColors: [
       {
-        color: "White",
+        color: "Whited",
         images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870836/SamsungS24c1_yywdt7.jpg"]
       },
       {
-        color: "White",
+        color: "Whitfe",
         images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870840/SamsungS24.jpgc2_vo7mcc.jpg"]
       }
     ]
@@ -724,7 +724,7 @@ description:`<h1>Apple iPhone 14</h1>
     images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870272/SamsungGalaxyNote20Ultra_b7rx8u.jpg"],
     productColors: [
       {
-        color: "White",
+        color: "Whiter",
         images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870282/SamsungGalaxyNote20Ultrac1_i3bibj.jpg"]
       }
     ]
@@ -1010,144 +1010,144 @@ description:`<h1>Apple iPhone 14</h1>
     images: ["https://res.cloudinary.com/dohqshaup/image/upload/f_webp/v1755870262/pixel7pro_easucn.jpg"],
     productColors: [
       {
-        color: "White",
-        images: ["/placeholderimage.webp"]
+        color: "Whited",
+        images: ["/placeholder.jpg"]
       }
     ]
   },
   {
     _id: "12",
-    name: "Classic White T-Shirt",
+    name: "Demo Product",
     description: "A premium quality cotton t-shirt perfect for everyday wear. Made from 100% organic cotton with a comfortable fit and durable construction.",
     miniDescription: "Comfortable cotton t-shirt",
     price: 29.99,
     discountPrice: 24.99,
     category: "Clothing",
     inStock: false,
-    images: ["/placeholderimage.webp"],
+    images: ["/placeholder.jpg"],
     productColors: [
       {
         color: "White",
-        images: ["/placeholderimage.webp"]
+        images: ["/placeholder.jpg"]
       }
     ]
   },
   {
     _id: "13",
-    name: "Classic White T-Shirt",
+    name: "Demo Product",
     description: "A premium quality cotton t-shirt perfect for everyday wear. Made from 100% organic cotton with a comfortable fit and durable construction.",
     miniDescription: "Comfortable cotton t-shirt",
     price: 29.99,
     discountPrice: 24.99,
     category: "Clothing",
     inStock: false,
-    images: ["/placeholderimage.webp"],
+    images: ["/placeholder.jpg"],
     productColors: [
       {
         color: "White",
-        images: ["/placeholderimage.webp"]
+        images: ["/placeholder.jpg"]
       }
     ]
   },
   {
     _id: "14",
-    name: "Classic White T-Shirt",
+    name: "Demo Product",
     description: "A premium quality cotton t-shirt perfect for everyday wear. Made from 100% organic cotton with a comfortable fit and durable construction.",
     miniDescription: "Comfortable cotton t-shirt",
     price: 29.99,
     discountPrice: 24.99,
     category: "Clothing",
     inStock: false,
-    images: ["/placeholderimage.webp"],
+    images: ["/placeholder.jpg"],
     productColors: [
       {
         color: "White",
-        images: ["/placeholderimage.webp"]
+        images: ["/placeholder.jpg"]
       }
     ]
   },
   {
     _id: "15",
-    name: "Classic White T-Shirt",
+    name: "Demo Product",
     description: "A premium quality cotton t-shirt perfect for everyday wear. Made from 100% organic cotton with a comfortable fit and durable construction.",
     miniDescription: "Comfortable cotton t-shirt",
     price: 29.99,
     discountPrice: 24.99,
     category: "Clothing",
     inStock: false,
-    images: ["/placeholderimage.webp"],
+    images: ["/placeholder.jpg"],
     productColors: [
       {
         color: "White",
-        images: ["/placeholderimage.webp"]
+        images: ["/placeholder.jpg"]
       }
     ]
   },
   {
     _id: "16",
-    name: "Classic White T-Shirt",
+    name: "Demo Product",
     description: "A premium quality cotton t-shirt perfect for everyday wear. Made from 100% organic cotton with a comfortable fit and durable construction.",
     miniDescription: "Comfortable cotton t-shirt",
     price: 29.99,
     discountPrice: 24.99,
     category: "Clothing",
     inStock: false,
-    images: ["/placeholderimage.webp"],
+    images: ["/placeholder.jpg"],
     productColors: [
       {
         color: "White",
-        images: ["/placeholderimage.webp"]
+        images: ["/placeholder.jpg"]
       }
     ]
   },
   {
     _id: "17",
-    name: "Classic White T-Shirt",
+    name: "Demo Product",
     description: "A premium quality cotton t-shirt perfect for everyday wear. Made from 100% organic cotton with a comfortable fit and durable construction.",
     miniDescription: "Comfortable cotton t-shirt",
     price: 29.99,
     discountPrice: 24.99,
     category: "Clothing",
     inStock: false,
-    images: ["/placeholderimage.webp"],
+    images: ["/placeholder.jpg"],
     productColors: [
       {
         color: "White",
-        images: ["/placeholderimage.webp"]
+        images: ["/placeholder.jpg"]
       }
     ]
   },
   {
     _id: "18",
-    name: "Classic White T-Shirt",
+    name: "Demo Product",
     description: "A premium quality cotton t-shirt perfect for everyday wear. Made from 100% organic cotton with a comfortable fit and durable construction.",
     miniDescription: "Comfortable cotton t-shirt",
     price: 29.99,
     discountPrice: 24.99,
     category: "Clothing",
     inStock: false,
-    images: ["/placeholderimage.webp"],
+    images: ["/placeholder.jpg"],
     productColors: [
       {
         color: "White",
-        images: ["/placeholderimage.webp"]
+        images: ["/placeholder.jpg"]
       }
     ]
   },
   {
     _id: "19",
-    name: "Classic White T-Shirt",
+    name: "Demo Product",
     description: "A premium quality cotton t-shirt perfect for everyday wear. Made from 100% organic cotton with a comfortable fit and durable construction.",
     miniDescription: "Comfortable cotton t-shirt",
     price: 29.99,
     discountPrice: 24.99,
     category: "Clothing",
     inStock: false,
-    images: ["/placeholderimage.webp"],
+    images: ["/placeholder.jpg"],
     productColors: [
       {
         color: "White",
-        images: ["/placeholderimage.webp"]
+        images: ["/placeholder.jpg"]
       }
     ]
   }

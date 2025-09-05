@@ -292,36 +292,31 @@ const OrderPage = () => {
                             const isSelected =
                               item.selectedColor === colorOption.color;
                             return (
+                           
+
                               <div
-                                key={colorOption.color}
-                                className="text-center"
-                              >
-                                <Image
-                                  src={colorOption.images[0]}
-                                  alt={colorOption.color}
-                                  width={48}
-                                  height={48}
-                                  onClick={() =>
-                                    inStock && handleColorSelect(
-                                      item._id,
-                                      colorOption.color,
-                                      colorOption.images[0]
-                                    )
-                                  }
-                                  className={`rounded-md cursor-pointer transition duration-200 border-2 ${
-                                    isSelected
-                                      ? "border-blue-600 ring-2 ring-blue-300"
-                                      : "border-gray-200 hover:border-gray-400"
-                                  } ${
-                                    !inStock
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
-                                />
-                                <p className="text-xs mt-1 text-gray-600">
-                                  {colorOption.color}
-                                </p>
-                              </div>
+  key={colorOption.color}
+  className="text-center"
+>
+  <div className="w-12 h-12 relative">
+    <Image
+      src={colorOption.images[0]}
+      alt={colorOption.color}
+      fill
+      onClick={() =>
+        inStock &&
+        handleColorSelect(item._id, colorOption.color, colorOption.images[0])
+      }
+      className={` cursor-pointer object-cover transition rounded-full duration-200 border-2 ${
+        isSelected
+          ? "border-blue-600 ring-2 ring-blue-300"
+          : "border-gray-200 hover:border-gray-400"
+      } ${!inStock ? "opacity-50 cursor-not-allowed" : ""}`}
+    />
+  </div>
+
+</div>
+
                             );
                           })}
                         </div>

@@ -130,6 +130,10 @@ const ProductPage = () => {
     setActiveImageIndex(0);
     scrollToIndex(0);
   };
+  useEffect(() => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}, [productId]);
+
 
  
   if (!product)
